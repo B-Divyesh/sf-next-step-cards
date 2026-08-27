@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F3EAD7" />
+    <meta name="description" content="Leave yourself one clear next action and return without reopening the whole plan." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon-192.png" />
+    <link rel="preload" as="image" href="/assets/hero-card.webp" type="image/webp" fetchpriority="high" />
+    <title>Next Step Cards — return to one clear action</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to your card</a>
+    <div id="app">
+      <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Next Step Cards home"><span aria-hidden="true">✓</span> Next Step Cards</a>
+        <nav aria-label="Utilities">
+          <button class="quiet-button" id="data-button" type="button">Data &amp; settings</button>
+          <button class="quiet-button supporter-button" id="support-button" type="button">Supporter edition</button>
+        </nav>
+      </header>
+      <main id="main" tabindex="-1">
+        <div class="loading-state" aria-live="polite"><span class="print-spinner" aria-hidden="true"></span> Opening your card…</div>
+      </main>
+      <footer class="site-footer">
+        <p>Private by design. Everything you write stays on this device.</p>
+        <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+        <p class="art-note">Original illustration generated for this product; no stock imagery.</p>
+      </footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>

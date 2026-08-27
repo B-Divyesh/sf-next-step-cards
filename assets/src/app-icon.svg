@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Next Step Cards icon</title>
+  <desc id="desc">A cream index card with a vermilion check mark on a charcoal field</desc>
+  <rect width="512" height="512" fill="#1D2524"/>
+  <circle cx="42" cy="70" r="3" fill="#F3EAD7" opacity=".4"/>
+  <circle cx="82" cy="38" r="5" fill="#F3EAD7" opacity=".3"/>
+  <circle cx="455" cy="101" r="4" fill="#F3EAD7" opacity=".35"/>
+  <circle cx="423" cy="448" r="5" fill="#F3EAD7" opacity=".3"/>
+  <path d="M91 112h330v288H91z" fill="#FFF9EA" stroke="#F3EAD7" stroke-width="8"/>
+  <path d="M157 260l66 65 136-151" fill="none" stroke="#B83B25" stroke-linecap="square" stroke-linejoin="miter" stroke-width="46"/>
+</svg>
