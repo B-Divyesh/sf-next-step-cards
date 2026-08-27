@@ -1,5 +1,22 @@
 # Next Step Cards — build handoff
 
+## Independent verification status — FAIL
+
+Verifier work order: `next-step-cards-verify-1`
+
+Verified candidate: `6936dc7d86505e61e9d64697e9d50eb4d293282d`
+
+Verified live URL: <https://next-step-cards.sociobot.in>
+
+Date: 2026-08-27
+
+**FAIL:** the built and live candidate have a 390px mobile boundary failure.
+A valid 100-character unbroken task name causes horizontal document overflow
+after card creation. Production bytes match the candidate, so this is a
+release defect, not a deployment mismatch. See
+[`verification.md`](verification.md) for exact reproduction, passing checks,
+cache/header findings, and required fixes.
+
 Work order: `next-step-cards-build-1`
 
 Completed: 2026-08-27
