@@ -26,6 +26,7 @@ let state: AppState = defaultState();
 let supporterUnlocked = hasOptimisticUnlock();
 let reminderTimer: number | undefined;
 let installPrompt: BeforeInstallPromptEvent | null = null;
+let isOffline = !navigator.onLine;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -129,7 +130,7 @@ function emptyView(): string {
         <h1 id="page-title">One clear step. Nothing else.</h1>
         <p class="lede">Leave the exact action that gets you moving again. No project plan, no coach, no streak—just the context you chose.</p>
         <figure class="hero-print">
-          <img src="/assets/hero-card.webp" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp" srcset="/assets/hero-card-640.webp 640w, /assets/hero-card.webp 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
@@ -147,7 +148,7 @@ function activeView(card: Card): string {
   const due = card.reminderAt && new Date(card.reminderAt).getTime() <= Date.now();
   return `
     <section class="workspace" aria-labelledby="page-title">
-      ${!navigator.onLine ? '<div class="offline-banner" role="status"><p><strong>Offline and ready.</strong> Your card is saved on this device.</p></div>' : ''}
+      ${isOffline ? '<div class="offline-banner" role="status"><p><strong>Offline and ready.</strong> Your card is saved on this device.</p></div>' : ''}
       ${due ? `<div class="reminder-banner" role="status"><p><strong>Gentle reminder:</strong> this step is here when you are ready.</p><button class="button small" id="dismiss-reminder" type="button">Dismiss reminder</button></div>` : ''}
       <p class="eyebrow">Your active card</p>
       <h1 id="page-title">Welcome back to this step.</h1>
@@ -346,7 +347,10 @@ function bindDialogEvents(): void {
     const error = document.querySelector<HTMLElement>('#license-error')!;
     const token = String(new FormData(form).get('license') ?? '').trim();
     if (!token) { error.textContent = 'Paste the license token from your receipt.'; return; }
-    storeLicense(token);
+    try { storeLicense(token); } catch (storageError) {
+      error.textContent = storageError instanceof Error ? storageError.message : 'This license could not be saved.';
+      return;
+    }
     error.textContent = 'Checking your license…';
     const result = await verifyLicense(true);
     if (!result) { supporterUnlocked = true; error.textContent = 'Saved for offline use. Verification will retry when you are online.'; render(); openDialog('support-dialog'); return; }
@@ -421,6 +425,20 @@ async function registerServiceWorker(): Promise<void> {
   } catch { showToast('Offline setup did not finish. The app still works while connected.', 6500); }
 }
 
+async function probeConnectivity(): Promise<void> {
+  let nextOffline = false;
+  try {
+    const response = await fetch(`/manifest.webmanifest?connectivity=${Date.now()}`, { cache: 'no-store' });
+    nextOffline = !response.ok;
+  } catch {
+    nextOffline = true;
+  }
+  if (nextOffline !== isOffline) {
+    isOffline = nextOffline;
+    render();
+  }
+}
+
 async function init(): Promise<void> {
   const returned = captureReturnedLicense();
   supporterUnlocked = hasOptimisticUnlock();
@@ -442,12 +460,13 @@ async function init(): Promise<void> {
     main.innerHTML = `<section class="error-panel"><p class="eyebrow">Storage needs attention</p><h1>We couldn’t open your local card.</h1><p>${escapeHtml(error instanceof Error ? error.message : 'Local storage is unavailable.')}</p><p>Check private-browsing or storage settings, then reload. Nothing has been sent anywhere.</p><button class="button" type="button" onclick="location.reload()">Try again</button></section>`;
   }
   await registerServiceWorker();
+  await probeConnectivity();
 }
 
 document.querySelector('#data-button')?.addEventListener('click', () => openDialog('data-dialog'));
 document.querySelector('#support-button')?.addEventListener('click', () => openDialog('support-dialog'));
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); installPrompt = event as BeforeInstallPromptEvent; });
-window.addEventListener('online', () => { showToast('Back online. Your local card was available throughout.'); render(); });
-window.addEventListener('offline', () => { showToast('You are offline. Your card remains available.'); render(); });
+window.addEventListener('online', () => { isOffline = false; showToast('Back online. Your local card was available throughout.'); render(); void probeConnectivity(); });
+window.addEventListener('offline', () => { isOffline = true; showToast('You are offline. Your card remains available.'); render(); });
 
 void init();

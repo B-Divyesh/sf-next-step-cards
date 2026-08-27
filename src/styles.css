@@ -268,7 +268,7 @@ dialog::backdrop { background: rgb(29 37 36 / 63%); }
   background: var(--card);
 }
 .toast[hidden] { display: none; }
-.loading-state { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 40vh; color: var(--muted); }
+.loading-state { display: flex; justify-content: center; align-items: flex-start; gap: 12px; min-height: 100vh; color: var(--muted); opacity: 0; }
 .print-spinner { width: 20px; height: 20px; border: 2px dotted var(--accent); border-radius: 50%; animation: spin 1s steps(8) infinite; }
 .error-panel { max-width: 640px; padding: 28px; border: 2px solid var(--danger); background: var(--card); }
 

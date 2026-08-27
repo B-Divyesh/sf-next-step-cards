@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://next-step-cards.sociobot.in/sitemap.xml

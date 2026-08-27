@@ -6,6 +6,18 @@ const ONE_DAY = 86_400_000;
 
 interface Verdict { valid: boolean; checkedAt: number; reason?: string }
 
+function read(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function write(key: string, value: string): boolean {
+  try { localStorage.setItem(key, value); return true; } catch { return false; }
+}
+
+function remove(key: string): void {
+  try { localStorage.removeItem(key); } catch { /* Storage may be disabled. */ }
+}
+
 export function checkoutUrl(): string {
   return `${BILLING_BASE}/api/v1/products/${PRODUCT_SLUG}/checkout`;
 }
@@ -14,32 +26,32 @@ export function captureReturnedLicense(): boolean {
   const url = new URL(location.href);
   const token = url.searchParams.get('license');
   if (!token) return false;
-  localStorage.setItem(LICENSE_KEY, token);
-  localStorage.removeItem(VERDICT_KEY);
+  const saved = write(LICENSE_KEY, token);
+  remove(VERDICT_KEY);
   url.searchParams.delete('license');
   history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
-  return true;
+  return saved;
 }
 
 export function storeLicense(token: string): void {
-  localStorage.setItem(LICENSE_KEY, token.trim());
-  localStorage.removeItem(VERDICT_KEY);
+  if (!write(LICENSE_KEY, token.trim())) throw new Error('This browser blocked local license storage.');
+  remove(VERDICT_KEY);
 }
 
 export function hasOptimisticUnlock(): boolean {
-  const token = localStorage.getItem(LICENSE_KEY);
+  const token = read(LICENSE_KEY);
   if (!token) return false;
   try {
-    const verdict = JSON.parse(localStorage.getItem(VERDICT_KEY) ?? 'null') as Verdict | null;
+    const verdict = JSON.parse(read(VERDICT_KEY) ?? 'null') as Verdict | null;
     return verdict?.valid ?? true;
   } catch { return true; }
 }
 
 export async function verifyLicense(force = false): Promise<{ valid: boolean; reason?: string } | null> {
-  const token = localStorage.getItem(LICENSE_KEY);
+  const token = read(LICENSE_KEY);
   if (!token) return null;
   try {
-    const cached = JSON.parse(localStorage.getItem(VERDICT_KEY) ?? 'null') as Verdict | null;
+    const cached = JSON.parse(read(VERDICT_KEY) ?? 'null') as Verdict | null;
     if (!force && cached && Date.now() - cached.checkedAt < ONE_DAY) return cached;
   } catch { /* verify again */ }
   try {
@@ -47,7 +59,7 @@ export async function verifyLicense(force = false): Promise<{ valid: boolean; re
     if (!response.ok) return null;
     const data = await response.json() as { valid: boolean; reason?: string };
     const verdict: Verdict = { valid: data.valid, reason: data.reason, checkedAt: Date.now() };
-    localStorage.setItem(VERDICT_KEY, JSON.stringify(verdict));
+    write(VERDICT_KEY, JSON.stringify(verdict));
     return verdict;
   } catch {
     return null;
