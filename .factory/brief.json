@@ -1,0 +1,9 @@
+{
+  "slug": "next-step-cards",
+  "title": "Next Step Cards",
+  "user": "A person with executive-function fatigue who needs to resume a real task after interruption without reopening an overwhelming project plan or relying on a chat assistant.",
+  "smallest_useful_product": "An offline PWA with one active card: task name, next 2-minute action, required link/file, why it matters, and a completion/park decision. It can schedule a gentle local reminder and show a re-entry history.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "No dark patterns, streaks or guilt notifications; all data local/exportable; reminders respect OS quiet hours and reduced-motion preferences; no clinical claims."
+}
