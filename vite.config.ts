@@ -6,13 +6,14 @@ function inlineAppShell(): Plugin {
     name: 'inline-offline-app-shell',
     enforce: 'post',
     generateBundle(_options, bundle) {
-      const html = bundle['index.html'];
       const script = bundle['assets/app.js'];
       const style = bundle['assets/style.css'];
-      if (html?.type !== 'asset' || script?.type !== 'chunk' || style?.type !== 'asset') return;
-      html.source = html.source.toString()
-        .replace(/<script type="module"[^>]*src="\/assets\/app\.js"><\/script>/, `<script type="module">${script.code}</script>`)
-        .replace(/<link rel="stylesheet"[^>]*href="\/assets\/style\.css"[^>]*>/, `<style>${style.source.toString()}</style>`);
+      if (script?.type !== 'chunk' || style?.type !== 'asset') return;
+      for (const [fileName, output] of Object.entries(bundle)) {
+        if (output.type !== 'asset' || !fileName.endsWith('.html')) continue;
+        output.source = output.source.toString().replace(/<link rel="stylesheet"[^>]*href="\/assets\/style\.css"[^>]*>/, `<style>${style.source.toString()}</style>`);
+        if (fileName === 'index.html') output.source = output.source.toString().replace(/<script type="module"[^>]*src="\/assets\/app\.js"><\/script>/, `<script type="module">${script.code}</script>`);
+      }
     },
   };
 }
