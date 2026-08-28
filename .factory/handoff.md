@@ -1,54 +1,29 @@
-# Next Step Cards — review 4 handoff
+# Next Step Cards — polish 4 handoff
 
-Work order: `next-step-cards-review-4`
-Reviewed commit: `e8fd7a2089ae9ea05a2c36521c08e5e824426aea`
-Live target: <https://next-step-cards.sociobot.in>
-
-## Reviewer status
-
-- No product code was changed. The independent acceptance result is recorded in
-  `.factory/review-4.md`.
-- Fresh live mobile and desktop checks passed for cold-read clarity, one-click
-  sample demo, demo isolation, reset, real-card preservation, offline reload,
-  same-origin traffic, no console errors, and zero live Axe violations.
-- A fresh clone passed `npm ci` (0 vulnerabilities), `npm test` (7/7), and
-  `npm run build`. Each of the twelve exact commands in `.factory/claims.json`
-  passed separately in the configured desktop and mobile browser projects.
-
-## Known gap
-
-- **F-4-1 (minor):** Browser Back restores the demo content but leaves focus on
-  `body`, not the restored “Welcome back to this step.” h1. Add persisted
-  Back/Forward focus and live announcement handling, with a `page.goBack()`
-  focus regression, before the next acceptance review.
-
-## Prior repair handoff
-
-Work order: `next-step-cards-polish-3`
-Repair commit: `fd827075fefae11dd9bf9e8ddebf13d8bc201df5`
-Deployment: `c61049fe-b037-470a-bf5b-486b64d60d52`
-Live: <https://next-step-cards.sociobot.in>
+Repair commit: `ad043dc602389384a8b6307bc8b453c1ab47451b`
+Deployment: `d0ce6b10-1e5a-4e5b-b8c4-334d230dee25`
+Live site: <https://next-step-cards.sociobot.in>
 
 ## Done
 
-- Replaced the demo banner’s nested `aside` landmark with a plain `div`. The
-  controls stay visible and operable, without falsely creating a complementary
-  landmark inside `main`.
-- Raised the browser accessibility regression from serious/critical-only to
-  zero Axe violations across `/`, `/demo/`, `/privacy/`, `/terms/`, and the
-  designed 404 page, on desktop and mobile.
-- Advanced the PWA shell, manifest, icon, and image cache version to `1.0.5`
-  so installed apps receive this repaired HTML shell. The warm paper,
-  letterpress-card visual system is unchanged.
-- Kept all earlier-review repairs intact: clear first-screen copy, one-click
-  isolated demo at `/demo/` and `?demo=1`, separate `demo:next-step-cards`
-  storage, declared claim coverage, mobile wrapping, real metadata/routing,
-  legal links, and the designed HTTP 404.
+- Fixed F-4-1: Back/Forward restoration now moves focus to the restored app
+  heading and announces `Demo — Next Step Cards restored` in a polite live
+  region. It covers both back-forward-cache restores and browsers that reload
+  the app shell on history navigation.
+- Made dynamic app headings programmatically focusable without altering normal
+  initial-load focus. Added desktop and mobile browser regression coverage.
+- Bumped the PWA shell, manifest, icons, image URLs, and visible build marker
+  to `1.0.6` so installed clients receive the repaired app shell.
+- Rechecked every earlier review finding: one-click isolated demo, sample
+  banner/reset/exit, local privacy, claims, exports/imports, offline reload,
+  first-screen copy, mobile wrapping, metadata, shared legal shell, 404,
+  headers, and non-generic print-card visual identity all remain working.
+- Updated `.factory/catalog-description.txt` with the verb-first description:
+  `Resume interrupted work with one clear next step.`
 
-## Verification
+## How verified
 
-A separate clean clone at repair commit `fd827075fefae11dd9bf9e8ddebf13d8bc201df5`
-ran:
+From a separate clean clone of `ad043dc602389384a8b6307bc8b453c1ab47451b`:
 
 ```sh
 npm ci
@@ -57,48 +32,51 @@ npm run build
 npm run test:e2e
 ```
 
-- `npm ci`: passed; 0 vulnerabilities.
+- `npm ci`: passed, 0 vulnerabilities.
 - `npm test`: 7/7 passed.
 - `npm run build`: passed; `dist/index.html` exists.
-- `npm run test:e2e`: 30/30 passed, including desktop and mobile routes,
-  keyboard/mobile, privacy, isolation, offline, 404, and the all-impact Axe
-  regression.
-- Each of the 12 exact commands in `.factory/claims.json` was invoked
-  separately in that clean clone. All passed in desktop and mobile (24 claim
-  executions). The command log ends with `CLAIM_SUITE_PASSED` at
-  `/tmp/next-step-cards-polish-3.fXBluF/claim-tests.log`.
-- `npm audit --omit=dev --audit-level=high`: passed; 0 vulnerabilities.
+- `npm run test:e2e`: 32/32 passed across desktop and mobile, including the
+  zero-Axe route scan, keyboard/history focus, demo isolation, privacy,
+  offline, 404, and 390 px layout checks.
+- All twelve exact claim commands in `.factory/claims.json` were run
+  separately from that same clean clone and passed in both browser projects.
+  Evidence: `.factory/evidence/polish-4-clean-clone-claims.log`.
+- `npm audit --omit=dev --audit-level=high`: passed, 0 vulnerabilities.
+- Local mobile Lighthouse 13.4.1: Performance 100, Accessibility 100, LCP
+  0.8 s, CLS 0. Shipped app JS is 8,308 B gzip, CSS 3,946 B gzip, and mobile
+  hero art 33,242 B.
 
-The production build is within transfer budgets: app JavaScript is 8,142 B
-gzip, CSS is 3,935 B gzip, and the mobile hero is 33,242 B. There are no
-shipped web fonts. Lighthouse 13.4.1 was attempted twice against the live site
-with the installed Playwright Chromium; its launcher could not connect to that
-browser, so it did not emit a report. The full browser, Axe, URL, offline, and
-bundle-budget checks above passed independently.
+## Live recheck after deployment
 
-## Live evidence
+- `/opt/fleet/lib/verify-url.sh` passed on `/`, `/demo/`, `?demo=1`,
+  `/privacy/`, `/terms/`, and `/404.html`; reports and screenshots are under
+  `.factory/evidence/polish-4-live/`.
+- A fresh live mobile context directly opened `?demo=1`, confirmed realistic
+  sample data, demo banner, Reset demo, Start for real, the isolated
+  `demo:next-step-cards` store, and same-origin requests.
+- A separate live context created a real card, used and exited demo, and
+  confirmed that real card remained unchanged. After service-worker control,
+  live `/demo/` reloaded while offline with the sample card present.
+- Live `/demo/ → /privacy/ → Back` focused `#page-title` and announced the
+  restored demo. Live Axe found zero violations on all shipped routes.
+- Every live route has the expected title, description, canonical, Open Graph,
+  Twitter, favicon, Apple touch icon, one h1, main landmark, and shared legal
+  footer. `/no-such-route` returns HTTP 404 with the designed return path.
+- Live manifest MIME, CSP, Permissions-Policy, Referrer-Policy, `nosniff`,
+  and immutable asset cache headers were checked after deployment.
 
-- `/opt/fleet/lib/verify-url.sh` passed for `/`, `/demo/`, `?demo=1`,
-  `/privacy/`, `/terms/`, and `/404.html`: title, `lang`, one h1, main,
-  image alt text, labelled buttons, and zero browser errors. Screenshots and
-  JSON reports are under `.factory/evidence/polish-3-live-*`.
-- A fresh 390 px live browser context created a real card, opened `?demo=1`,
-  reset and parked sample data, chose Start for real, and found the original
-  card unchanged. It observed only `https://next-step-cards.sociobot.in`
-  requests. It also reloaded `/demo/` offline after service-worker control.
-- The same cold 390 px pass clicked the home demo action, confirmed there is
-  no checkout/supporter UI, checked Privacy h1 focus, and created a card with
-  every maximum-length unbroken field without horizontal overflow. Screenshot:
-  `.factory/evidence/polish-3-live-max-values-390.png`.
-- Live Axe found zero violations on home, demo, both legal pages, and 404;
-  the demo has zero `landmark-complementary-is-top-level` nodes. Evidence:
-  `.factory/evidence/polish-3-live-demo-390.png` and
-  `.factory/evidence/polish-3-live-demo/screenshot-mobile.png`.
-- `/no-such-route` returns HTTP 404 with the designed “This page is not here.”
-  response. Live headers retain CSP, Permissions-Policy, manifest MIME, and
-  immutable image/icon caching.
+## Run and deploy
+
+```sh
+npm ci
+npm run dev
+npm test
+npm run build
+npm run test:e2e
+```
+
+Deploy the generated `dist/` folder as the configured static site.
 
 ## Known gaps
 
-None. The only Lighthouse limitation is the container launcher; it is not a
-product defect.
+None.
