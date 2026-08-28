@@ -83,3 +83,16 @@ test('fits the primary workflow at 390px and supports keyboard submission', asyn
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);
 });
+
+test('wraps a maximum-length unbroken task name at 390px without page overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const taskName = 'T'.repeat(100);
+  await page.getByLabel('Task name').fill(taskName);
+  await page.getByLabel('Next two-minute action').fill('A'.repeat(280));
+  await page.getByRole('button', { name: 'Set this next step' }).click();
+
+  await expect(page.getByRole('heading', { name: taskName })).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  expect(overflow).toBe(false);
+});

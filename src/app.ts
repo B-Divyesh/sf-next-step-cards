@@ -130,7 +130,7 @@ function emptyView(): string {
         <h1 id="page-title">One clear step. Nothing else.</h1>
         <p class="lede">Leave the exact action that gets you moving again. No project plan, no coach, no streak—just the context you chose.</p>
         <figure class="hero-print">
-          <img src="/assets/hero-card-640.webp" srcset="/assets/hero-card-640.webp 640w, /assets/hero-card.webp 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp?v=1.0.2" srcset="/assets/hero-card-640.webp?v=1.0.2 640w, /assets/hero-card.webp?v=1.0.2 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
@@ -426,6 +426,14 @@ async function registerServiceWorker(): Promise<void> {
 }
 
 async function probeConnectivity(): Promise<void> {
+  if (!navigator.onLine) {
+    if (!isOffline) {
+      isOffline = true;
+      render();
+    }
+    return;
+  }
+
   let nextOffline = false;
   try {
     const response = await fetch(`/manifest.webmanifest?connectivity=${Date.now()}`, { cache: 'no-store' });

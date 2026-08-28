@@ -1,16 +1,16 @@
-const CACHE_NAME = 'next-step-cards-shell-v1.0.1';
+const CACHE_NAME = 'next-step-cards-shell-v1.0.2';
 const SHELL = [
   '/',
   '/index.html',
   '/privacy/',
   '/terms/',
   '/offline.html',
-  '/manifest.webmanifest',
-  '/assets/hero-card-640.webp',
-  '/assets/hero-card.webp',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/maskable-512.png',
+  '/manifest.webmanifest?v=1.0.2',
+  '/assets/hero-card-640.webp?v=1.0.2',
+  '/assets/hero-card.webp?v=1.0.2',
+  '/icons/icon-192.png?v=1.0.2',
+  '/icons/icon-512.png?v=1.0.2',
+  '/icons/maskable-512.png?v=1.0.2',
 ];
 
 self.addEventListener('install', (event) => {
