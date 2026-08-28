@@ -12,6 +12,7 @@ async function createRealCard(page: import('@playwright/test').Page, name = 'Pre
 
 test('@claim:demo-ready loads a realistic sample in one visit', async ({ page }) => {
   await page.goto('/?demo=1');
+  await expect(page).toHaveURL('/demo/');
   await expect(page).toHaveTitle('Demo — Next Step Cards');
   await expect(page.getByText('Demo — sample data, nothing is saved.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Draft the community grant outline' })).toBeVisible();
@@ -23,6 +24,20 @@ test('@claim:demo-ready loads a realistic sample in one visit', async ({ page })
   await expect(page.getByRole('heading', { name: 'Draft the community grant outline' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
   await expect(page.locator('.history-item')).toHaveCount(2);
+});
+
+test('gives both demo entry points complete demo route metadata', async ({ page }) => {
+  const description = 'Try a realistic sample card and history. Nothing is saved to your cards.';
+
+  for (const route of ['/?demo=1', '/demo/']) {
+    await page.goto(route);
+    await expect(page).toHaveURL('/demo/');
+    await expect(page).toHaveTitle('Demo — Next Step Cards');
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', description);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', description);
+    await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', description);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://next-step-cards.sociobot.in/demo/');
+  }
 });
 
 test('@claim:demo-isolated never reads or changes real cards', async ({ page }) => {

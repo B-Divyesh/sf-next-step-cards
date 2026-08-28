@@ -1,9 +1,9 @@
 # Demo sandbox
 
-Open <https://next-step-cards.sociobot.in/demo/> or
-<https://next-step-cards.sociobot.in/?demo=1>. Both load the same isolated
-sample: an active community-grant-outline card and two realistic workshop-brief
-history entries.
+Open <https://next-step-cards.sociobot.in/demo/>. It loads an active
+community-grant-outline card and two realistic workshop-brief history entries.
+The older `?demo=1` entry immediately redirects there before app content or
+home-page metadata loads.
 
 Demo state uses the IndexedDB database `demo:next-step-cards`. Real cards use
 `next-step-cards`; demo mode never reads or writes that database. **Reset demo**

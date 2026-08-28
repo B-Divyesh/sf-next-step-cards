@@ -22,6 +22,7 @@ let isOffline = !navigator.onLine;
 const currentUrl = new URL(location.href);
 const demoMode = currentUrl.pathname === '/demo' || currentUrl.pathname === '/demo/' || currentUrl.searchParams.get('demo') === '1';
 const storageMode: StorageMode = demoMode ? 'demo' : 'real';
+const DEMO_DESCRIPTION = 'Try a realistic sample card and history. Nothing is saved to your cards.';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -129,7 +130,7 @@ function emptyView(): string {
         <p class="action-outcome">See a filled card and history first.</p>
         <ul class="plain-facts" aria-label="Product facts"><li>Saved in this browser</li><li>Reload while offline after your first visit</li><li>Core tools are free</li></ul>
         <figure class="hero-print">
-          <img src="/assets/hero-card-640.webp?v=1.0.6" srcset="/assets/hero-card-640.webp?v=1.0.6 640w, /assets/hero-card.webp?v=1.0.6 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp?v=1.0.7" srcset="/assets/hero-card-640.webp?v=1.0.7 640w, /assets/hero-card.webp?v=1.0.7 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
@@ -428,10 +429,12 @@ async function probeConnectivity(): Promise<void> {
 async function init(): Promise<void> {
   if (demoMode) {
     document.title = 'Demo — Next Step Cards';
-    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', 'Try a realistic sample card and history. Nothing is saved to your cards.');
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', DEMO_DESCRIPTION);
     document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://next-step-cards.sociobot.in/demo/');
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', 'Demo — Next Step Cards');
+    document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', DEMO_DESCRIPTION);
     document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', 'Demo — Next Step Cards');
+    document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')?.setAttribute('content', DEMO_DESCRIPTION);
   }
   try {
     const loaded = validateImportedState(await loadState(storageMode));
