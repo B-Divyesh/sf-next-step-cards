@@ -1,82 +1,49 @@
-# Next Step Cards — polish 4 handoff
+# Next Step Cards — review 5 handoff
 
-Repair commit: `ad043dc602389384a8b6307bc8b453c1ab47451b`
-Deployment: `d0ce6b10-1e5a-4e5b-b8c4-334d230dee25`
-Live site: <https://next-step-cards.sociobot.in>
+Review date: 2026-08-28
+
+Reviewed commit: c5f19cead1a9d9912f9d95c3c4674b1238a75814
+Live site: https://next-step-cards.sociobot.in
 
 ## Done
 
-- Fixed F-4-1: Back/Forward restoration now moves focus to the restored app
-  heading and announces `Demo — Next Step Cards restored` in a polite live
-  region. It covers both back-forward-cache restores and browsers that reload
-  the app shell on history navigation.
-- Made dynamic app headings programmatically focusable without altering normal
-  initial-load focus. Added desktop and mobile browser regression coverage.
-- Bumped the PWA shell, manifest, icons, image URLs, and visible build marker
-  to `1.0.6` so installed clients receive the repaired app shell.
-- Rechecked every earlier review finding: one-click isolated demo, sample
-  banner/reset/exit, local privacy, claims, exports/imports, offline reload,
-  first-screen copy, mobile wrapping, metadata, shared legal shell, 404,
-  headers, and non-generic print-card visual identity all remain working.
-- Updated `.factory/catalog-description.txt` with the verb-first description:
-  `Resume interrupted work with one clear next step.`
+- Completed the adversarial cold read at 390 × 844 and 1440 × 900.
+- Audited visible landing and README copy with word counts.
+- Exercised the live one-click demo, reset, real-data isolation, same-origin
+  network behavior, and offline reload.
+- Ran all twelve exact claim commands independently from a temporary clean
+  clone.
+- Rechecked every earlier review and verification finding in the live site and
+  current code/configuration.
+- Crawled live links; checked route metadata, designed 404, deep links,
+  forward/Back focus, shared shell, mobile overflow, and security/cache
+  headers.
+- Ran live Axe scans and the factory URL verifier on all shipped route
+  documents.
+- Wrote .factory/review-5.md. No product code was changed.
 
-## How verified
+## Verdict and remaining work
 
-From a separate clean clone of `ad043dc602389384a8b6307bc8b453c1ab47451b`:
+**FAIL** with one minor finding, F-5-1. The documented query-demo route changes
+to demo content but retains the home og:description and twitter:description;
+its raw response is also home metadata. Redirect that entry to /demo/ or serve
+complete demo metadata in its initial response, and add a raw-response/browser
+regression for all demo description tags.
 
-```sh
-npm ci
-npm test
-npm run build
-npm run test:e2e
-```
+## Verification
 
-- `npm ci`: passed, 0 vulnerabilities.
-- `npm test`: 7/7 passed.
-- `npm run build`: passed; `dist/index.html` exists.
-- `npm run test:e2e`: 32/32 passed across desktop and mobile, including the
-  zero-Axe route scan, keyboard/history focus, demo isolation, privacy,
-  offline, 404, and 390 px layout checks.
-- All twelve exact claim commands in `.factory/claims.json` were run
-  separately from that same clean clone and passed in both browser projects.
-  Evidence: `.factory/evidence/polish-4-clean-clone-claims.log`.
-- `npm audit --omit=dev --audit-level=high`: passed, 0 vulnerabilities.
-- Local mobile Lighthouse 13.4.1: Performance 100, Accessibility 100, LCP
-  0.8 s, CLS 0. Shipped app JS is 8,308 B gzip, CSS 3,946 B gzip, and mobile
-  hero art 33,242 B.
+    npm ci
+    npm test
+    npm run build
+    npm run test:e2e
 
-## Live recheck after deployment
+- npm test: 7/7 passed.
+- npm run build: passed and produced dist/.
+- npm run test:e2e: 32/32 passed across desktop and mobile.
+- Each command in .factory/claims.json: passed independently, 2/2 browser
+  projects per claim.
+- Live verify-url.sh: passed on home, demo, Privacy, Terms, and 404.
+- Live Axe: zero violations on those five routes.
 
-- `/opt/fleet/lib/verify-url.sh` passed on `/`, `/demo/`, `?demo=1`,
-  `/privacy/`, `/terms/`, and `/404.html`; reports and screenshots are under
-  `.factory/evidence/polish-4-live/`.
-- A fresh live mobile context directly opened `?demo=1`, confirmed realistic
-  sample data, demo banner, Reset demo, Start for real, the isolated
-  `demo:next-step-cards` store, and same-origin requests.
-- A separate live context created a real card, used and exited demo, and
-  confirmed that real card remained unchanged. After service-worker control,
-  live `/demo/` reloaded while offline with the sample card present.
-- Live `/demo/ → /privacy/ → Back` focused `#page-title` and announced the
-  restored demo. Live Axe found zero violations on all shipped routes.
-- Every live route has the expected title, description, canonical, Open Graph,
-  Twitter, favicon, Apple touch icon, one h1, main landmark, and shared legal
-  footer. `/no-such-route` returns HTTP 404 with the designed return path.
-- Live manifest MIME, CSP, Permissions-Policy, Referrer-Policy, `nosniff`,
-  and immutable asset cache headers were checked after deployment.
-
-## Run and deploy
-
-```sh
-npm ci
-npm run dev
-npm test
-npm run build
-npm run test:e2e
-```
-
-Deploy the generated `dist/` folder as the configured static site.
-
-## Known gaps
-
-None.
+See .factory/review-5.md for the finding, exact copy audit, claim matrix,
+earlier-finding audit, and concrete acceptance fix.
