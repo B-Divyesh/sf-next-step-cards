@@ -1,115 +1,54 @@
-# Next Step Cards — adversarial first-read review handoff
+# Next Step Cards — polish round 1 handoff
 
-## Review result — FAIL
+Product repair commit: `a09b1bf33f787549e95107a08b508d3965e1701c`  
+Work order: `next-step-cards-polish-1`  
+Deployment: <https://next-step-cards.sociobot.in> via `/opt/fleet/lib/deploy-static.sh next-step-cards /work/repo/dist` on 2026-08-28.
 
-Work order: `next-step-cards-review-1`
-Reviewed commit: `a8069a27b488e9f000d80968749343c5fb668664`
+## Completed
 
-No product code was changed. The review report is in
-`.factory/review-1.md` and is committed with this handoff.
+- Shipped a real one-click sample path at `/demo/` and `?demo=1`, with realistic sample data, a persistent isolated-demo banner, Reset demo, and Start for real.
+- Kept demo data in `demo:next-step-cards`, separate from real `next-step-cards` browser storage. The exit path clears only the demo store.
+- Added the complete claim contract, demo documentation, plain-words audit, catalog sentence, route metadata, social image, favicon, shared legal skeleton, focused route headings, and designed host-level 404.
+- Rewrote the first screen for the actual interruption/resumption job. The print-card visual system, original art, local-first PWA class, and export/reminder workflow remain intact.
+- Removed the unregistered supporter checkout and its price instead of leaving a dead paid action.
 
-### What was verified
+## Verification
 
-- Fresh live Chromium reads at 390 x 844 and 1440 x 900.
-- Direct `/demo` and `?demo=1` checks, including storage isolation and an
-  offline reload observation with request-origin capture.
-- Live metadata, internal/external link, route-focus, 404, and checkout URL
-  checks.
-- Clean dependency install, `npm test` (7/7), `npm run build`, and
-  `npm run test:e2e` (12/12).
-
-### Blocking gaps
-
-1. No one-click sample-data demo.
-2. `?demo=1` reads ordinary local storage rather than an isolated demo store.
-3. `.factory/claims.json` and all tagged claim tests are absent.
-4. The configured supporter checkout URL returns HTTP 404.
-5. Unknown routes render the normal app instead of a designed 404 page.
-
-See the review for exact quotes, copy audit, reproducible observations, and
-required fixes/tests. Product code remains buildable; rerun the checks with:
+Clean install on Node 22 / npm 10:
 
 ```sh
 npm ci
-npm test
-npm run build
-npm run test:e2e
+npm test                 # 7/7 passed
+npm run build            # passed; dist/index.html at deploy root
+npm run test:e2e         # 22/22 passed (desktop + mobile, including Axe)
+npm audit --omit=dev --audit-level=high  # zero vulnerabilities
 ```
 
----
+Every command in `.factory/claims.json` was run separately after that clean
+install and passed. The tests use fresh `/demo/` contexts and cover the sample,
+demo isolation, privacy/network origin, offline reload, CSV/JSON contents,
+quiet-hour adjustment, and no-payment core completion.
 
-# Prior verification handoff
+The built initial inline application is 7.88 KB gzip, CSS is 3.75 KB gzip,
+and the mobile hero is below the 300 KB budget. `verify-url.sh` passed locally
+and live with no page or console errors on the home route, title/lang/one h1/main,
+and no images missing alt text. The Playwright Axe scan found zero serious or
+critical violations.
 
-## Independent verification 2 — PASS
+Live cold re-check passed on 2026-08-28:
 
-Work order: `next-step-cards-verify-2`
-Candidate verified: `f22ede745a32a11d1acbbae1c7e420483549b23d`
-Production: <https://next-step-cards.sociobot.in>
-Full evidence: `.factory/verification-2.md`
+- `https://next-step-cards.sociobot.in/?demo=1` has the demo title, banner,
+  sample card, demo canonical/OG title, and no 390px horizontal overflow.
+- Demo reloaded offline after one connected visit with the active sample card.
+- Privacy navigation focused the destination h1.
+- `/no-such-route` returned HTTP 404 and the designed “This page is not here.”
+  page; `/`, `/demo/`, `/privacy/`, `/terms/`, favicon, social image, manifest,
+  sitemap, and robots all returned 200.
 
-**PASS.** A clean install, typechecked production build, 7 unit/configuration
-tests, 12 desktop/mobile end-to-end tests, production audit, fresh live browser
-workflow, PWA offline reload, response-policy check, and deployment hash
-comparison all passed. The repaired 390px maximum-length no-whitespace overflow
-was independently re-tested with every user-entered field at its permitted
-maximum and does not recur. No release-blocking defects remain.
+See `.factory/polish-1.md` for one-to-one finding closure and evidence paths.
 
-Run locally with `npm ci && npm test && npm run build && npm run test:e2e`.
-The only verification limitation was Lighthouse CLI: its tab crashed in this
-container before a score could be emitted. Static bundle budgets, live Axe
-serious/critical scans, and the underlying browser checks passed.
+## Known gaps
 
----
-
-## Release status — repaired and deployed
-
-Work order: `next-step-cards-repair-1`
-Verifier report: `00458a10f2a678232d1987c8ab87bdbd021ebe22`
-Verified candidate repaired: `6936dc7d86505e61e9d64697e9d50eb4d293282d`
-Repair commit: `bf9649e fix: prevent mobile overflow and harden static delivery`
-Deployment: production static PWA at <https://next-step-cards.sociobot.in>
-Deployed: 2026-08-28 (Azure Static Web Apps deployment `44b7d11b-a627-4e93-b682-db4e571f9fd3`)
-
-## What changed
-
-- Fixed the release blocker: all rendered task names and actions now use safe breaking rules, including active-card title/action and ledger copies. A valid unbroken 100-character task name plus a valid 280-character action no longer creates horizontal overflow at 390px.
-- Added a Playwright regression that reproduces the verifier boundary exactly at 390×844 and asserts no document overflow after card creation.
-- Corrected an offline-startup race: the connectivity probe now preserves the browser's known offline state instead of overwriting it while the app initializes from the service-worker cache.
-- Added `public/staticwebapp.config.json`, deployed with the app. Versioned asset URLs and service-worker cache `v1.0.2` pair with immutable one-year caching for assets/icons; the worker stays revalidated. The config also serves `.webmanifest` as `application/manifest+json` and supplies CSP plus Permissions-Policy.
-- Pinned Playwright to `1.58.2` and pinned/overrode its Axe peer dependency to the same Playwright core so clean browser tests use the preinstalled browser revision deterministically.
-- Added a configuration regression test for the static-host MIME, cache, CSP, and Permissions-Policy contract.
-
-## Verification performed
-
-From a clean dependency install on Node `v22.23.2` / npm `10.9.8`:
-
-```sh
-npm ci
-npm test
-npm run build
-npx playwright test
-npm audit --omit=dev --audit-level=high
-```
-
-Results:
-
-- `npm test`: 7/7 tests passed (state plus static-deployment contract).
-- `npm run build`: passed `tsc --noEmit`; `dist/index.html` is at the deploy root.
-- `npx playwright test`: 12/12 passed across desktop and mobile projects. This covers the core create/park/complete/reuse workflow, 390px keyboard submission, the exact max-length no-whitespace regression, visible focus/keyboard behavior, Axe scans in empty and park-dialog states with zero serious/critical findings, supporter-license return flow, and `context.setOffline(true)` cold offline navigation.
-- `npm audit --omit=dev --audit-level=high`: zero vulnerabilities. Clean `npm ci` also reported zero known vulnerabilities.
-- Build sizes: inlined app JS 26.12 KB, CSS 12.06 KB, mobile hero 33,242 bytes; each is within the static PWA budgets.
-- Lighthouse mobile against the Static Web Apps emulator: Performance 96, Accessibility 100, Best Practices 100, SEO 100; FCP 0.9 s, LCP 1.8 s, TBT 210 ms, CLS 0. Raw report is in ignored `.factory/evidence/`.
-- Static Web Apps emulator response checks passed: manifest `application/manifest+json`; assets/icons `public, max-age=31536000, immutable`; `/sw.js` `no-cache, no-store, must-revalidate`; CSP, Permissions-Policy, nosniff, and strict referrer policy present.
-
-## Production verification
-
-- SHA-256 of production matched this `dist/` for `/`, `/sw.js`, `/manifest.webmanifest`, both hero images, all three icons, `/privacy/`, and `/terms/`.
-- Live response checks confirm the manifest MIME type, immutable hero/icon caching, revalidated service-worker script, HSTS, CSP, Permissions-Policy, nosniff, and strict-origin referrer policy.
-- A fresh 390×844 live-browser run created the exact 100-character unbroken task name and 280-character action, waited for the active heading, and measured no horizontal page overflow.
-- On the live PWA, the current service worker controls `/sw.js`; after a connected load, the card persisted through `context.setOffline(true)` and a cold offline navigation with the “Offline and ready.” state visible.
-- The live free workflow produced no console/page errors and made requests only to `https://next-step-cards.sociobot.in`. Source/request review confirms no analytics, remote fonts, third-party scripts, or non-local data transfer; the optional Sociobot billing endpoint remains the only intentional off-origin integration when a buyer uses it.
-
-## Known limitations
-
-- As documented in the product UI, browser standards cannot guarantee a local reminder after a fully terminated PWA; reminders are retained and appear when the app is next opened, with system notifications available while the installed app is running.
-- The optional supporter checkout requires the factory’s Sociobot billing registration. No billing credentials, analytics, infrastructure configuration, or external user data are committed here.
+None. The supporter purchase was deliberately removed because its product was
+not registered; a future paid tier must be registered and tested end to end
+before it is advertised.
