@@ -1,4 +1,28 @@
-# Next Step Cards — polish 3 handoff
+# Next Step Cards — review 4 handoff
+
+Work order: `next-step-cards-review-4`
+Reviewed commit: `e8fd7a2089ae9ea05a2c36521c08e5e824426aea`
+Live target: <https://next-step-cards.sociobot.in>
+
+## Reviewer status
+
+- No product code was changed. The independent acceptance result is recorded in
+  `.factory/review-4.md`.
+- Fresh live mobile and desktop checks passed for cold-read clarity, one-click
+  sample demo, demo isolation, reset, real-card preservation, offline reload,
+  same-origin traffic, no console errors, and zero live Axe violations.
+- A fresh clone passed `npm ci` (0 vulnerabilities), `npm test` (7/7), and
+  `npm run build`. Each of the twelve exact commands in `.factory/claims.json`
+  passed separately in the configured desktop and mobile browser projects.
+
+## Known gap
+
+- **F-4-1 (minor):** Browser Back restores the demo content but leaves focus on
+  `body`, not the restored “Welcome back to this step.” h1. Add persisted
+  Back/Forward focus and live announcement handling, with a `page.goBack()`
+  focus regression, before the next acceptance review.
+
+## Prior repair handoff
 
 Work order: `next-step-cards-polish-3`
 Repair commit: `fd827075fefae11dd9bf9e8ddebf13d8bc201df5`
