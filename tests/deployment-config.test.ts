@@ -13,10 +13,10 @@ test('ships versioned immutable assets and required static-host response policie
   const worker = readFileSync('public/sw.js', 'utf8');
   const headersFor = (route: string) => config.routes.find((rule) => rule.route === route)?.headers;
 
-  expect(index).toContain('hero-card-640.webp?v=1.0.5');
+  expect(index).toContain('hero-card-640.webp?v=1.0.6');
   expect(index).toContain('apple-touch-icon');
-  expect(manifest).toContain('"start_url": "/?source=installed&v=1.0.5"');
-  expect(worker).toContain("next-step-cards-shell-v1.0.5");
+  expect(manifest).toContain('"start_url": "/?source=installed&v=1.0.6"');
+  expect(worker).toContain("next-step-cards-shell-v1.0.6");
   expect(headersFor('/assets/*')?.['Cache-Control']).toBe('public, max-age=31536000, immutable');
   expect(headersFor('/icons/*')?.['Cache-Control']).toBe('public, max-age=31536000, immutable');
   expect(headersFor('/sw.js')?.['Cache-Control']).toBe('no-cache, no-store, must-revalidate');

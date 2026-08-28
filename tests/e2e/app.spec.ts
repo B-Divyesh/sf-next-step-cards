@@ -175,6 +175,17 @@ test('has no accessibility violations on every shipped route and supports route 
   await expect(page.locator('h1')).toBeFocused();
 });
 
+test('restores demo heading focus and announces the page after browser Back', async ({ page }) => {
+  await page.goto('/demo/');
+  await page.getByRole('link', { name: 'Privacy' }).first().click();
+  await expect(page).toHaveURL('/privacy/');
+
+  await page.goBack();
+  await expect(page).toHaveURL('/demo/');
+  await expect(page.locator('#page-title')).toBeFocused();
+  await expect(page.locator('#route-announcer')).toHaveText('Demo — Next Step Cards restored');
+});
+
 test('keeps the first screen and maximum values within a 390px viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');

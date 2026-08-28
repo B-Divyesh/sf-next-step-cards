@@ -123,13 +123,13 @@ function emptyView(): string {
     <section class="empty-layout" aria-labelledby="page-title">
       <div>
         <p class="eyebrow">A card for your return</p>
-        <h1 id="page-title">Return to work with one clear next step.</h1>
+        <h1 id="page-title" tabindex="-1">Return to work with one clear next step.</h1>
         <p class="lede">For people resuming a task after an interruption, without reopening a full project plan.</p>
         <div class="hero-actions"><a class="button primary" href="/demo/">Try it with sample data</a><a class="button" href="#create-card">Create my card</a></div>
         <p class="action-outcome">See a filled card and history first.</p>
         <ul class="plain-facts" aria-label="Product facts"><li>Saved in this browser</li><li>Reload while offline after your first visit</li><li>Core tools are free</li></ul>
         <figure class="hero-print">
-          <img src="/assets/hero-card-640.webp?v=1.0.5" srcset="/assets/hero-card-640.webp?v=1.0.5 640w, /assets/hero-card.webp?v=1.0.5 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp?v=1.0.6" srcset="/assets/hero-card-640.webp?v=1.0.6 640w, /assets/hero-card.webp?v=1.0.6 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
@@ -151,7 +151,7 @@ function activeView(card: Card): string {
       ${due ? `<div class="reminder-banner" role="status"><p><strong>Gentle reminder:</strong> this step is here when you are ready.</p><button class="button small" id="dismiss-reminder" type="button">Dismiss reminder</button></div>` : ''}
       ${demoBanner()}
       <p class="eyebrow">Your active card</p>
-      <h1 id="page-title">Welcome back to this step.</h1>
+      <h1 id="page-title" tabindex="-1">Welcome back to this step.</h1>
       <p class="lede">You already made the decision. Begin with the action on the card.</p>
       <article class="active-card" aria-labelledby="active-task">
         <div class="card-index"><span>Card 01 / Active</span><time datetime="${card.updatedAt}">Set ${displayDate(card.updatedAt)}</time></div>
@@ -445,9 +445,27 @@ async function init(): Promise<void> {
   await probeConnectivity();
 }
 
+function restorePersistedRouteFocus(): void {
+  const heading = document.querySelector<HTMLElement>('#page-title');
+  const announcer = document.querySelector<HTMLElement>('#route-announcer');
+  if (!heading) return;
+  heading.focus({ preventScroll: true });
+  if (announcer) announcer.textContent = `${document.title} restored`;
+}
+
+function isHistoryRestoration(): boolean {
+  return (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type === 'back_forward';
+}
+
 document.querySelector('#data-button')?.addEventListener('click', () => openDialog('data-dialog'));
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); installPrompt = event as BeforeInstallPromptEvent; });
 window.addEventListener('online', () => { isOffline = false; showToast('Back online. Your local card was available throughout.'); render(); void probeConnectivity(); });
 window.addEventListener('offline', () => { isOffline = true; showToast('You are offline. Your card remains available.'); render(); });
+window.addEventListener('pageshow', (event) => {
+  if (!event.persisted) return;
+  window.requestAnimationFrame(restorePersistedRouteFocus);
+});
 
-void init();
+void init().then(() => {
+  if (isHistoryRestoration()) window.requestAnimationFrame(restorePersistedRouteFocus);
+});
