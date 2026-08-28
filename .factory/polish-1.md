@@ -1,6 +1,6 @@
 # Polish round 1 — finding closure
 
-Repair commit: `a09b1bf33f787549e95107a08b508d3965e1701c`  
+Repair commits: `a09b1bf33f787549e95107a08b508d3965e1701c` and `693ba021968723968087f960c21f26242c9393a6`  
 Live: <https://next-step-cards.sociobot.in>
 
 | Finding | Change made | Evidence |

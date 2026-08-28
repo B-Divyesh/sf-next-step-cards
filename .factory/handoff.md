@@ -1,8 +1,8 @@
 # Next Step Cards — polish round 1 handoff
 
-Product repair commit: `a09b1bf33f787549e95107a08b508d3965e1701c`  
+Product repair commits: `a09b1bf33f787549e95107a08b508d3965e1701c` and `693ba021968723968087f960c21f26242c9393a6`  
 Work order: `next-step-cards-polish-1`  
-Deployment: <https://next-step-cards.sociobot.in> via `/opt/fleet/lib/deploy-static.sh next-step-cards /work/repo/dist` on 2026-08-28.
+Deployment: <https://next-step-cards.sociobot.in> via `/opt/fleet/lib/deploy-static.sh next-step-cards /work/repo/dist` on 2026-08-28 (Azure deployment `58c19d1c-2b12-4417-b256-46864f00624f`).
 
 ## Completed
 
