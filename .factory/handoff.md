@@ -1,4 +1,25 @@
-# Next Step Cards — repair handoff
+# Next Step Cards — verification handoff
+
+## Independent verification 2 — PASS
+
+Work order: `next-step-cards-verify-2`
+Candidate verified: `f22ede745a32a11d1acbbae1c7e420483549b23d`
+Production: <https://next-step-cards.sociobot.in>
+Full evidence: `.factory/verification-2.md`
+
+**PASS.** A clean install, typechecked production build, 7 unit/configuration
+tests, 12 desktop/mobile end-to-end tests, production audit, fresh live browser
+workflow, PWA offline reload, response-policy check, and deployment hash
+comparison all passed. The repaired 390px maximum-length no-whitespace overflow
+was independently re-tested with every user-entered field at its permitted
+maximum and does not recur. No release-blocking defects remain.
+
+Run locally with `npm ci && npm test && npm run build && npm run test:e2e`.
+The only verification limitation was Lighthouse CLI: its tab crashed in this
+container before a score could be emitted. Static bundle budgets, live Axe
+serious/critical scans, and the underlying browser checks passed.
+
+---
 
 ## Release status — repaired and deployed
 
