@@ -23,7 +23,7 @@ Live: <https://next-step-cards.sociobot.in>
 
 ## Evidence
 
-- Fresh clone at `bb32cc7`: `npm ci`, `npm test` (7/7), `npm run build`,
+- Fresh clone at `cd1a160abfdfba4a01f3de9358b2e5ba0087fc8a`: `npm ci`, `npm test` (7/7), `npm run build`,
   `npm run test:e2e` (30/30), and production dependency audit (0
   vulnerabilities) passed.
 - The twelve exact claim commands in `.factory/claims.json` passed in desktop

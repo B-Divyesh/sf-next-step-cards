@@ -20,7 +20,7 @@ Live: <https://next-step-cards.sociobot.in>
 
 ## Verify
 
-From a fresh clone of `bb32cc7`:
+From a fresh clone of `cd1a160abfdfba4a01f3de9358b2e5ba0087fc8a`:
 
 ```sh
 npm ci
