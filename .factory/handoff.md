@@ -1,54 +1,41 @@
-# Next Step Cards — polish round 1 handoff
+# Next Step Cards — adversarial review 2 handoff
 
-Product repair commits: `a09b1bf33f787549e95107a08b508d3965e1701c` and `693ba021968723968087f960c21f26242c9393a6`  
-Work order: `next-step-cards-polish-1`  
-Deployment: <https://next-step-cards.sociobot.in> via `/opt/fleet/lib/deploy-static.sh next-step-cards /work/repo/dist` on 2026-08-28 (Azure deployment `58c19d1c-2b12-4417-b256-46864f00624f`).
+Work order: `next-step-cards-review-2`
+Review target: <https://next-step-cards.sociobot.in>
+Product code changed: none.
 
-## Completed
+## Done
 
-- Shipped a real one-click sample path at `/demo/` and `?demo=1`, with realistic sample data, a persistent isolated-demo banner, Reset demo, and Start for real.
-- Kept demo data in `demo:next-step-cards`, separate from real `next-step-cards` browser storage. The exit path clears only the demo store.
-- Added the complete claim contract, demo documentation, plain-words audit, catalog sentence, route metadata, social image, favicon, shared legal skeleton, focused route headings, and designed host-level 404.
-- Rewrote the first screen for the actual interruption/resumption job. The print-card visual system, original art, local-first PWA class, and export/reminder workflow remain intact.
-- Removed the unregistered supporter checkout and its price instead of leaving a dead paid action.
+- Wrote the independent first-read review in `.factory/review-2.md`.
+- Reviewed the brief, visual thesis, claims contract, demo documentation, every
+  earlier review/polish/handoff document, and the relevant implementation.
+- Checked live mobile (390 × 844) and desktop (1440 × 900) first screens,
+  demo entry/reset/exit/isolation, offline reload, network origins, routing,
+  metadata, 404, focus/back behaviour, links, and visual identity.
+- Performed a clean `npm ci`, then ran `npm test`, `npm run build`,
+  `npm run test:e2e`, and every exact command listed in `.factory/claims.json`.
 
-## Verification
+## Result
 
-Clean install on Node 22 / npm 10:
+FAIL: four minor unlisted functional claims remain in dialog copy. None of the
+eight declared claim tests failed. See F-2-1 through F-2-4 in
+`.factory/review-2.md` for exact quotes and required tests.
+
+## Verify
 
 ```sh
 npm ci
-npm test                 # 7/7 passed
-npm run build            # passed; dist/index.html at deploy root
-npm run test:e2e         # 22/22 passed (desktop + mobile, including Axe)
-npm audit --omit=dev --audit-level=high  # zero vulnerabilities
+npm test
+npm run build
+npm run test:e2e
 ```
 
-Every command in `.factory/claims.json` was run separately after that clean
-install and passed. The tests use fresh `/demo/` contexts and cover the sample,
-demo isolation, privacy/network origin, offline reload, CSV/JSON contents,
-quiet-hour adjustment, and no-payment core completion.
+Then run each command in `.factory/claims.json`. The reviewer ran all eight
+against the clean dependency installation.
 
-The built initial inline application is 8.15 KB gzip, CSS is 3.92 KB gzip,
-and the mobile hero is below the 300 KB budget. `verify-url.sh` passed locally
-and live with no page or console errors on the home route, title/lang/one h1/main,
-and no images missing alt text. The Playwright Axe scan found zero serious or
-critical violations.
+## Known gaps / next steps
 
-Live cold re-check passed on 2026-08-28:
-
-- `https://next-step-cards.sociobot.in/?demo=1` has the demo title, banner,
-  sample card, demo canonical/OG title, and no 390px horizontal overflow.
-- Demo reloaded offline after one connected visit with the active sample card.
-- Privacy navigation focused the destination h1.
-- `/no-such-route` returned HTTP 404 and the designed “This page is not here.”
-  page; `/`, `/demo/`, `/privacy/`, `/terms/`, favicon, social image, manifest,
-  sitemap, and robots all returned 200.
-
-See `.factory/polish-1.md` for one-to-one finding closure and evidence paths.
-
-## Known gaps
-
-None. The supporter purchase was deliberately removed because its product was
-not registered; a future paid tier must be registered and tested end to end
-before it is advertised.
+Add claim entries and observable demo tests for completion history, parking
+history, JSON import restore, and clearing history while retaining the active
+card, or remove those promises. No product or deployment changes were made by
+this review.
