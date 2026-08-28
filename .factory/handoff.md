@@ -1,72 +1,54 @@
-# Next Step Cards — build handoff
+# Next Step Cards — repair handoff
 
-## Independent verification status — FAIL
+## Release status — repaired and deployed
 
-Verifier work order: `next-step-cards-verify-1`
+Work order: `next-step-cards-repair-1`
+Verifier report: `00458a10f2a678232d1987c8ab87bdbd021ebe22`
+Verified candidate repaired: `6936dc7d86505e61e9d64697e9d50eb4d293282d`
+Repair commit: `bf9649e fix: prevent mobile overflow and harden static delivery`
+Deployment: production static PWA at <https://next-step-cards.sociobot.in>
+Deployed: 2026-08-28 (Azure Static Web Apps deployment `44b7d11b-a627-4e93-b682-db4e571f9fd3`)
 
-Verified candidate: `6936dc7d86505e61e9d64697e9d50eb4d293282d`
+## What changed
 
-Verified live URL: <https://next-step-cards.sociobot.in>
+- Fixed the release blocker: all rendered task names and actions now use safe breaking rules, including active-card title/action and ledger copies. A valid unbroken 100-character task name plus a valid 280-character action no longer creates horizontal overflow at 390px.
+- Added a Playwright regression that reproduces the verifier boundary exactly at 390×844 and asserts no document overflow after card creation.
+- Corrected an offline-startup race: the connectivity probe now preserves the browser's known offline state instead of overwriting it while the app initializes from the service-worker cache.
+- Added `public/staticwebapp.config.json`, deployed with the app. Versioned asset URLs and service-worker cache `v1.0.2` pair with immutable one-year caching for assets/icons; the worker stays revalidated. The config also serves `.webmanifest` as `application/manifest+json` and supplies CSP plus Permissions-Policy.
+- Pinned Playwright to `1.58.2` and pinned/overrode its Axe peer dependency to the same Playwright core so clean browser tests use the preinstalled browser revision deterministically.
+- Added a configuration regression test for the static-host MIME, cache, CSP, and Permissions-Policy contract.
 
-Date: 2026-08-27
+## Verification performed
 
-**FAIL:** the built and live candidate have a 390px mobile boundary failure.
-A valid 100-character unbroken task name causes horizontal document overflow
-after card creation. Production bytes match the candidate, so this is a
-release defect, not a deployment mismatch. See
-[`verification.md`](verification.md) for exact reproduction, passing checks,
-cache/header findings, and required fixes.
-
-Work order: `next-step-cards-build-1`
-
-Completed: 2026-08-27
-
-Artifact: static offline PWA, deployed from `dist/`
-
-## What was built
-
-- A single-active-card workflow for task name, next two-minute action, required link/file/place, why it matters, stopping point, and optional reminder.
-- Explicit completion and parking decisions. Parking rewrites the active next step; every start, park, and completion appears in a local re-entry ledger. Finished cards can be reused.
-- IndexedDB persistence across reloads, browser restarts, and installation.
-- Local reminders with configurable quiet hours (21:00–08:00 by default), in-app due state, and optional system notifications while the app is running.
-- JSON backup/restore with import preview and CSV history export. Clear-history is confirmed and keeps the active card.
-- Installable manifest, 192/512/maskable icons, service worker with versioned shell cache, offline navigation, notification click handling, and update-ready feedback.
-- A privacy-first US $6 one-time supporter tier. The free experience remains complete; valid Sociobot licenses unlock only Moss Field and Night Ledger cosmetic print editions. Return-token capture, daily verification cache, offline optimistic unlock, invalid-license reconciliation, and manual restore are included.
-- `/privacy/` and `/terms/` pages, MIT license, README, sitemap, and robots policy.
-- Original dithered/halftone artwork generated with the factory image model, manually reviewed, and exported at 640px/33 KB and 1200px/136 KB WebP sizes. Prompt and provenance are in `.factory/design.md` and `assets/src/`.
-
-## Visual system
-
-The committed `.factory/design.md` records the “quiet print room” thesis, palette, type roles, 4px spacing rhythm, interaction grammar, reduced-motion treatment, illustration prompt, and asset provenance. The UI deliberately resembles one physical continuation card and a simple print ledger rather than a productivity dashboard.
-
-## Verification
-
-Run from a clean checkout with Node.js 22+:
+From a clean dependency install on Node `v22.23.2` / npm `10.9.8`:
 
 ```sh
 npm ci
 npm test
 npm run build
-npx playwright install chromium
-npm run test:e2e
+npx playwright test
+npm audit --omit=dev --audit-level=high
 ```
 
-Results on 2026-08-27:
+Results:
 
-- `npm test`: 6/6 unit tests passed.
-- `npm run build`: passed; `dist/index.html` is at the deploy root.
-- `npm run test:e2e`: 10/10 desktop/mobile tests passed, including `context.setOffline(true)` cold navigation, 390px overflow, keyboard submission, license verification, and two Axe scans with zero serious/critical violations.
-- Factory `verify-url.sh`: passed; title present, `lang="en"`, exactly one h1, main landmark present, zero missing alt attributes, zero unlabeled buttons, and zero console/page errors. Recorded load was 689 ms on localhost.
-- Lighthouse 12 mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. FCP 0.7 s, LCP 1.7 s, CLS 0, TBT 30 ms.
-- Initial app payload: 26.1 KB JavaScript and 11.9 KB CSS before gzip, inlined into the cached app shell; 33 KB mobile hero. All are below product budgets.
-- `npm audit`: zero known vulnerabilities at build time.
+- `npm test`: 7/7 tests passed (state plus static-deployment contract).
+- `npm run build`: passed `tsc --noEmit`; `dist/index.html` is at the deploy root.
+- `npx playwright test`: 12/12 passed across desktop and mobile projects. This covers the core create/park/complete/reuse workflow, 390px keyboard submission, the exact max-length no-whitespace regression, visible focus/keyboard behavior, Axe scans in empty and park-dialog states with zero serious/critical findings, supporter-license return flow, and `context.setOffline(true)` cold offline navigation.
+- `npm audit --omit=dev --audit-level=high`: zero vulnerabilities. Clean `npm ci` also reported zero known vulnerabilities.
+- Build sizes: inlined app JS 26.12 KB, CSS 12.06 KB, mobile hero 33,242 bytes; each is within the static PWA budgets.
+- Lighthouse mobile against the Static Web Apps emulator: Performance 96, Accessibility 100, Best Practices 100, SEO 100; FCP 0.9 s, LCP 1.8 s, TBT 210 ms, CLS 0. Raw report is in ignored `.factory/evidence/`.
+- Static Web Apps emulator response checks passed: manifest `application/manifest+json`; assets/icons `public, max-age=31536000, immutable`; `/sw.js` `no-cache, no-store, must-revalidate`; CSP, Permissions-Policy, nosniff, and strict referrer policy present.
 
-Raw local reports and screenshots were produced under `.factory/evidence/` and are intentionally gitignored because they contain machine-specific localhost data.
+## Production verification
 
-## Known gaps and release notes
+- SHA-256 of production matched this `dist/` for `/`, `/sw.js`, `/manifest.webmanifest`, both hero images, all three icons, `/privacy/`, and `/terms/`.
+- Live response checks confirm the manifest MIME type, immutable hero/icon caching, revalidated service-worker script, HSTS, CSP, Permissions-Policy, nosniff, and strict-origin referrer policy.
+- A fresh 390×844 live-browser run created the exact 100-character unbroken task name and 280-character action, waited for the active heading, and measured no horizontal page overflow.
+- On the live PWA, the current service worker controls `/sw.js`; after a connected load, the card persisted through `context.setOffline(true)` and a cold offline navigation with the “Offline and ready.” state visible.
+- The live free workflow produced no console/page errors and made requests only to `https://next-step-cards.sociobot.in`. Source/request review confirms no analytics, remote fonts, third-party scripts, or non-local data transfer; the optional Sociobot billing endpoint remains the only intentional off-origin integration when a buyer uses it.
 
-- Browsers do not offer a reliable standards-based, local-only alarm after a PWA is fully terminated. The reminder is retained and shown on next open; a system notification fires when the installed app is running. The UI explains this instead of implying background delivery.
-- The factory must register `next-step-cards` in Sociobot billing before purchase links can complete. Production defaults to `https://api.sociobot.in`; set `VITE_BILLING_BASE_URL=https://pilot-api.sociobot.in` for staging registration/testing. No product ID or secret is embedded.
-- iOS installation uses Safari’s Add to Home Screen flow because `beforeinstallprompt` is not available there; the PWA itself remains installable.
+## Known limitations
 
-No infrastructure, DNS, billing registration, analytics, or external data service was changed.
+- As documented in the product UI, browser standards cannot guarantee a local reminder after a fully terminated PWA; reminders are retained and appear when the app is next opened, with system notifications available while the installed app is running.
+- The optional supporter checkout requires the factory’s Sociobot billing registration. No billing credentials, analytics, infrastructure configuration, or external user data are committed here.
