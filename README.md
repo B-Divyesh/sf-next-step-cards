@@ -14,6 +14,8 @@ Open <https://next-step-cards.sociobot.in/demo/> for a filled sample card and hi
 
 - Lets you choose a reminder time and quiet hours. Quiet hours move a reminder to the next available time.
 - Exports cards as JSON and history as CSV.
+- Finishing or parking a card keeps the useful step in history.
+- JSON restores a full backup. Clearing history keeps the active card.
 - Reloads the demo while offline after its first visit.
 
 The observable product promises and their exact browser tests are in [`.factory/claims.json`](.factory/claims.json).

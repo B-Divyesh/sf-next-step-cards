@@ -103,6 +103,65 @@ test('@claim:free-core lets a visitor complete a sample card without payment', a
   await expect(page.getByRole('heading', { name: 'Return to work with one clear next step.' })).toBeVisible();
 });
 
+test('@claim:completion-history keeps a finished sample card in history', async ({ page }) => {
+  await page.goto('/demo/');
+  await page.getByRole('button', { name: 'I finished this step' }).click();
+  await expect(page.getByRole('heading', { name: 'Return to work with one clear next step.' })).toBeVisible();
+  await expect(page.locator('.history-item').filter({ hasText: 'Draft the community grant outline' })).toContainText('Finished');
+  await page.reload();
+  await expect(page.locator('.history-item').filter({ hasText: 'Draft the community grant outline' })).toContainText('Finished');
+});
+
+test('@claim:park-history records the revised action in history', async ({ page }) => {
+  await page.goto('/demo/');
+  await page.getByRole('button', { name: 'Park with a new next step' }).click();
+  await page.locator('#park-dialog').getByLabel('Next two-minute action').fill('Write the budget heading in the grant outline.');
+  await page.getByRole('button', { name: 'Park this task' }).click();
+  await expect(page.locator('.next-action')).toHaveText('Write the budget heading in the grant outline.');
+  await expect(page.locator('.history-item').filter({ hasText: 'Write the budget heading in the grant outline.' })).toContainText('Parked');
+  await page.reload();
+  await expect(page.locator('.history-item').filter({ hasText: 'Write the budget heading in the grant outline.' })).toContainText('Parked');
+});
+
+test('@claim:json-import restores a complete demo backup', async ({ page }) => {
+  await page.goto('/demo/');
+  await page.getByRole('button', { name: 'Manage data and settings' }).click();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export JSON' }).click();
+  const backupPath = await (await download).path();
+  expect(backupPath).not.toBeNull();
+  await page.getByRole('button', { name: 'Close' }).click();
+
+  await page.getByRole('button', { name: 'Park with a new next step' }).click();
+  await page.locator('#park-dialog').getByLabel('Next two-minute action').fill('Change this action before restoring the backup.');
+  await page.getByRole('button', { name: 'Park this task' }).click();
+  await page.getByRole('button', { name: 'Manage data and settings' }).click();
+  await page.getByLabel('Start').selectOption('20');
+  await page.getByLabel('End').selectOption('7');
+  await page.getByRole('button', { name: 'Save quiet hours' }).click();
+
+  await page.getByRole('button', { name: 'Manage data and settings' }).click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.locator('#import-json').setInputFiles(backupPath!);
+  await expect(page.getByRole('heading', { name: 'Draft the community grant outline' })).toBeVisible();
+  await expect(page.locator('.history-item')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Manage data and settings' }).click();
+  await expect(page.getByLabel('Start')).toHaveValue('21');
+  await expect(page.getByLabel('End')).toHaveValue('8');
+});
+
+test('@claim:clear-history-preserves-active clears only demo history', async ({ page }) => {
+  await page.goto('/demo/');
+  await page.getByRole('button', { name: 'Manage data and settings' }).click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Clear history' }).click();
+  await expect(page.getByRole('heading', { name: 'Draft the community grant outline' })).toBeVisible();
+  await expect(page.getByText('0 entries')).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Draft the community grant outline' })).toBeVisible();
+  await expect(page.getByText('0 entries')).toBeVisible();
+});
+
 test('has no serious accessibility violations and supports route focus', async ({ page }) => {
   await page.goto('/demo/');
   const results = await new AxeBuilder({ page }).analyze();
@@ -116,6 +175,7 @@ test('keeps the first screen and maximum values within a 390px viewport', async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Manage data and settings' })).toBeVisible();
   await page.getByRole('link', { name: 'Create my card' }).click();
   await page.getByLabel('Task name').fill('T'.repeat(100));
   await page.getByLabel('Next two-minute action').fill('A'.repeat(280));

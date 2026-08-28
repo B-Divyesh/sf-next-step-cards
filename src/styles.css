@@ -92,6 +92,7 @@ a:hover { text-decoration-thickness: 3px; }
   cursor: pointer;
 }
 .quiet-button:hover { border-bottom-color: var(--ink); }
+.data-button-short { display: none; }
 
 main {
   min-height: calc(100vh - 250px);
@@ -316,13 +317,16 @@ dialog::backdrop { background: rgb(29 37 36 / 63%); }
   .hero-print { max-width: 580px; order: -1; }
   .site-header { align-items: flex-start; }
   .site-header nav { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .site-header nav .quiet-button { display: none; }
+  .data-button-full { display: none; }
+  .data-button-short { display: inline; }
 }
 
 @media (max-width: 560px) {
   body { font-size: 17px; background-size: 13px 13px; }
   .site-header, .site-footer, main { width: min(100% - 28px, 1120px); }
   .site-header { min-height: 68px; }
+  .site-header { flex-wrap: wrap; gap: 6px; }
+  .site-header nav { width: 100%; justify-content: space-between; }
   .wordmark { max-width: 145px; font-size: 15px; line-height: 1.1; }
   main { padding: 40px 0 64px; }
   h1 { font-size: clamp(2.45rem, 13vw, 3.4rem); }

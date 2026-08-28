@@ -1,1 +1,1 @@
-Return to a task with one clear next action after an interruption.
+Return to interrupted tasks with one clear next action.

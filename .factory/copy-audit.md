@@ -12,6 +12,7 @@
 | Saved in this browser | 5 | Pass; `privacy-local` |
 | Reload while offline after your first visit | 7 | Pass; `offline-reload` |
 | Core tools are free | 4 | Pass; `free-core` |
+| Manage data | 2 | Pass; compact mobile label with full accessible name |
 | How to use a next-step card | 7 | Pass |
 | Name the task. Write the work you will return to. | 10 | Pass |
 | Choose one small action. Make it physical enough to start. | 11 | Pass |
@@ -19,6 +20,10 @@
 | What happens to your card text | 7 | Pass |
 | Cards are stored in this browser. | 6 | Pass; `privacy-local` |
 | The demo uses separate sample storage and makes only same-origin requests. | 11 | Pass; `privacy-local` |
+| Finished clears this card and keeps it in history. | 9 | Pass; `completion-history` |
+| This change appears in your history. | 6 | Pass; `park-history` |
+| JSON restores the full app. | 5 | Pass; `json-import` |
+| This removes history but keeps the active card. | 8 | Pass; `clear-history-preserves-active` |
 
 No audited sentence exceeds 22 words or contains a banned term.
 
