@@ -1,48 +1,45 @@
-# Next Step Cards — polish 2 handoff
+# Next Step Cards — review 3 handoff
 
-Work order: `next-step-cards-polish-2`  
-Repair commit: `bb32cc7053ac1b9eec430c76ee8b9624669bfe09`  
+Work order: `next-step-cards-review-3`
+Review commit: this documentation commit
 Live: <https://next-step-cards.sociobot.in>
 
 ## Done
 
-- Closed every finding from review 1, verification 1, polish 1, and review 2.
-  The final four claim gaps now have isolated demo-backed tests:
-  completion history, parking history, JSON import restoration, and clearing
-  history while retaining the active card.
-- Kept the existing print-card visual system. Improved phone navigation so
-  data controls remain available as **Manage data**, while assistive technology
-  receives the full **Manage data and settings** name.
-- Bumped the PWA cache/build identifier to `1.0.4` and deployed `dist/` using
-  `/opt/fleet/lib/deploy-static.sh next-step-cards dist`.
-- Updated the catalog sentence: “Return to interrupted tasks with one clear
-  next action.”
+- Performed a fresh, no-code-change adversarial review of the live product at
+  390 px and desktop, plus a clean-clone verification at
+  `e35f69e3f9d824ab7b728156f643b33af676e240`.
+- Wrote `.factory/review-3.md` with the cold-read result, complete landing and
+  README copy audit, declared-claim evidence, demo/storage/offline checks,
+  history reconciliation, route/link/metadata evidence, and the final verdict.
+- Confirmed all prior functional findings remain fixed. The review found one
+  remaining minor accessibility issue: the demo banner is an `aside` nested in
+  `main`, producing Axe’s moderate `landmark-complementary-is-top-level`
+  violation.
 
 ## Verify
 
-From a fresh clone of `cd1a160abfdfba4a01f3de9358b2e5ba0087fc8a`:
+From a fresh clone:
 
 ```sh
 npm ci
 npm test
 npm run build
 npm run test:e2e
-npm audit --omit=dev --audit-level=high
 ```
 
-Results: 7/7 unit/configuration tests, 30/30 Playwright desktop/mobile tests,
-and zero production dependency vulnerabilities. Run every command listed in
-`.factory/claims.json`; all twelve passed in the fresh clone.
+Observed results: `npm test` 7/7 passed, build produced `dist/`, and the full
+Playwright suite passed 30/30. Every one of the 12 commands declared in
+`.factory/claims.json` was also run and passed.
 
-`verify-url.sh` passed locally and on the live `/demo/` route. The live cold
-browser re-check covered sample readiness, reset/exit isolation, all four
-newly claimed behaviors, focus routing, mobile settings/no overflow, offline
-reload, and HTTP 404. See `.factory/polish-2.md` for the finding-by-finding
-mapping and screenshot paths.
+Live checks confirmed the one-click seeded `/demo/` flow, reset behavior,
+real-data isolation, same-origin demo requests, offline demo reload, deep
+links/back/focus, HTTP 404, metadata, and link crawl. Live Axe scans found no
+serious or critical violations, but found the moderate demo-landmark issue
+recorded in review 3.
 
-## Known gaps
+## Known gap
 
-None in product behavior or acceptance findings. Lighthouse and the standalone
-`@axe-core/cli` could not start this container's non-system Chrome; the
-Playwright Axe checks passed with zero serious/critical violations and the
-compressed bundle stays well below budget.
+Review 3 is **FAIL** until `src/app.ts` changes the demo banner from the nested
+`aside` landmark to a non-landmark container and the Axe regression test covers
+this rule. No product source was changed by this review.
