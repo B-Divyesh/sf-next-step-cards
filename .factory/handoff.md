@@ -29,7 +29,7 @@ install and passed. The tests use fresh `/demo/` contexts and cover the sample,
 demo isolation, privacy/network origin, offline reload, CSV/JSON contents,
 quiet-hour adjustment, and no-payment core completion.
 
-The built initial inline application is 7.88 KB gzip, CSS is 3.75 KB gzip,
+The built initial inline application is 8.15 KB gzip, CSS is 3.92 KB gzip,
 and the mobile hero is below the 300 KB budget. `verify-url.sh` passed locally
 and live with no page or console errors on the home route, title/lang/one h1/main,
 and no images missing alt text. The Playwright Axe scan found zero serious or

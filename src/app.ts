@@ -228,12 +228,21 @@ function notificationStatus(): string {
 
 function render(): void {
   document.documentElement.dataset.edition = 'vermillion';
-  main.innerHTML = state.active ? activeView(state.active) : emptyView();
+  main.innerHTML = `${state.active ? activeView(state.active) : emptyView()}${supportingView()}`;
   document.querySelectorAll('dialog').forEach((node) => node.remove());
   document.body.insertAdjacentHTML('beforeend', dialogs());
   bindPageEvents();
   bindDialogEvents();
   scheduleReminder();
+}
+
+function supportingView(): string {
+  return `<section class="how-it-works" aria-labelledby="how-title">
+    <p class="eyebrow">A short return path</p><h2 id="how-title">How to use a next-step card</h2>
+    <ol><li><strong>Name the task.</strong> Write the work you will return to.</li><li><strong>Choose one small action.</strong> Make it physical enough to start.</li><li><strong>Park or finish it.</strong> Keep the useful context in history.</li></ol>
+  </section><section class="privacy-note" aria-labelledby="privacy-title">
+    <p class="eyebrow">Your words stay yours</p><h2 id="privacy-title">What happens to your card text</h2><p>Cards are stored in this browser. The demo uses separate sample storage and makes only same-origin requests.</p><a href="/privacy/">Read the privacy policy</a>
+  </section>`;
 }
 
 function validCardForm(form: HTMLFormElement, error: HTMLElement): boolean {
