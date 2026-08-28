@@ -45,6 +45,37 @@ export const defaultState = (): AppState => ({
   settings: { quietStart: 21, quietEnd: 8, printEdition: 'vermillion' },
 });
 
+/** A fixed, realistic sample. It lives only in the `demo:` database namespace. */
+export const demoState = (): AppState => ({
+  schemaVersion: 1,
+  active: {
+    id: 'demo-grant-outline',
+    taskName: 'Draft the community grant outline',
+    nextAction: 'Open the outline and write three section headings.',
+    resource: 'Drive/Grants/community-outline.md',
+    why: 'Maya can review the shape before tomorrow’s planning call.',
+    stopCondition: 'The three headings and one note under each are on the page.',
+    reminderAt: null,
+    createdAt: '2026-08-27T14:20:00.000Z',
+    updatedAt: '2026-08-28T09:15:00.000Z',
+  },
+  history: [
+    {
+      id: 'demo-workshop-started', cardId: 'demo-workshop', kind: 'started',
+      taskName: 'Prepare the neighborhood workshop brief', action: 'Open last month’s notes and highlight three questions.',
+      resource: 'Notes/workshop-july.md', why: 'The group needs a short agenda, not a full report.',
+      stopCondition: 'Three questions are highlighted.', timestamp: '2026-08-26T16:10:00.000Z',
+    },
+    {
+      id: 'demo-workshop-parked', cardId: 'demo-workshop', kind: 'parked',
+      taskName: 'Prepare the neighborhood workshop brief', action: 'Write the first agenda question in the shared draft.',
+      resource: 'Drive/Workshop/agenda.md', why: 'The facilitator can confirm the direction.',
+      stopCondition: 'One question is in the draft.', timestamp: '2026-08-27T11:35:00.000Z',
+    },
+  ],
+  settings: { quietStart: 21, quietEnd: 8, printEdition: 'vermillion' },
+});
+
 export function makeId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }

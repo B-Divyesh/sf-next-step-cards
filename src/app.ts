@@ -1,7 +1,8 @@
 import './styles.css';
-import { loadState, saveState } from './db';
+import { clearState, loadState, saveState, type StorageMode } from './db';
 import {
   defaultState,
+  demoState,
   entryFromCard,
   makeId,
   nextAllowedReminder,
@@ -10,23 +11,17 @@ import {
   type AppState,
   type Card,
   type HistoryEntry,
-  type PrintEdition,
 } from './state';
-import {
-  captureReturnedLicense,
-  checkoutUrl,
-  hasOptimisticUnlock,
-  storeLicense,
-  verifyLicense,
-} from './license';
 
 const main = document.querySelector<HTMLElement>('#main')!;
 const toast = document.querySelector<HTMLElement>('#toast')!;
 let state: AppState = defaultState();
-let supporterUnlocked = hasOptimisticUnlock();
 let reminderTimer: number | undefined;
 let installPrompt: BeforeInstallPromptEvent | null = null;
 let isOffline = !navigator.onLine;
+const currentUrl = new URL(location.href);
+const demoMode = currentUrl.pathname === '/demo' || currentUrl.pathname === '/demo/' || currentUrl.searchParams.get('demo') === '1';
+const storageMode: StorageMode = demoMode ? 'demo' : 'real';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -52,14 +47,14 @@ function resourceMarkup(resource: string): string {
   if (!resource) return '<span>Nothing extra needed</span>';
   try {
     const url = new URL(resource);
-    if (url.protocol === 'http:' || url.protocol === 'https:') return `<a href="${escapeHtml(url.href)}" target="_blank" rel="noopener noreferrer">Open required link <span aria-hidden="true">↗</span></a>`;
+    if (url.protocol === 'http:' || url.protocol === 'https:') return `<a href="${escapeHtml(url.href)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a>`;
   } catch { /* Render as a local file or context note. */ }
   return `<span>${escapeHtml(resource)}</span>`;
 }
 
 async function persist(message?: string): Promise<boolean> {
   try {
-    await saveState(state);
+    await saveState(state, storageMode);
     if (message) showToast(message);
     return true;
   } catch (error) {
@@ -102,7 +97,7 @@ function formFields(card?: Card): string {
       <span class="hint">Start with a physical verb: open, call, write, find, send.</span>
     </div>
     <div class="field">
-      <label for="resource">Required link, file, or place <span class="hint-inline">(optional)</span></label>
+      <label for="resource">Link, file, or place <span class="hint-inline">(optional)</span></label>
       <input id="resource" name="resource" maxlength="500" value="${escapeHtml(card?.resource ?? '')}" placeholder="https://… or Drafts/outline.md" />
     </div>
     <div class="field-row">
@@ -118,27 +113,31 @@ function formFields(card?: Card): string {
     <div class="field">
       <label for="reminder-at">Quiet reminder <span class="hint-inline">(optional)</span></label>
       <input id="reminder-at" name="reminderAt" type="datetime-local" value="${dateTimeLocal(card?.reminderAt ?? null)}" />
-      <span class="hint">Saved locally. It appears when this app is open or next reopened; system notifications work while the installed app is running. Quiet hours are respected.</span>
+      <span class="hint">Choose a time. Quiet hours move a reminder to the next available time.</span>
     </div>`;
 }
 
 function emptyView(): string {
   return `
+    ${demoBanner()}
     <section class="empty-layout" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">A note to your returning self</p>
-        <h1 id="page-title">One clear step. Nothing else.</h1>
-        <p class="lede">Leave the exact action that gets you moving again. No project plan, no coach, no streak—just the context you chose.</p>
+        <p class="eyebrow">A card for your return</p>
+        <h1 id="page-title">Return to work with one clear next step.</h1>
+        <p class="lede">For people resuming a task after an interruption, without reopening a full project plan.</p>
+        <div class="hero-actions"><a class="button primary" href="/demo/">Try it with sample data</a><a class="button" href="#create-card">Create my card</a></div>
+        <p class="action-outcome">See a filled card and history first.</p>
+        <ul class="plain-facts" aria-label="Product facts"><li>Saved in this browser</li><li>Reload while offline after your first visit</li><li>Core tools are free</li></ul>
         <figure class="hero-print">
-          <img src="/assets/hero-card-640.webp?v=1.0.2" srcset="/assets/hero-card-640.webp?v=1.0.2 640w, /assets/hero-card.webp?v=1.0.2 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp?v=1.0.3" srcset="/assets/hero-card-640.webp?v=1.0.3 640w, /assets/hero-card.webp?v=1.0.3 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
-        <h2>Leave your card</h2>
+        <h2 id="create-card">Create your next-step card</h2>
         <p class="lede">Only the first two fields are required.</p>
         ${formFields()}
         <p class="form-error" id="new-card-error" role="alert"></p>
-        <button class="button primary" type="submit">Set this next step</button>
+        <button class="button primary" type="submit">Create my next-step card</button>
       </form>
     </section>
     ${historyView()}`;
@@ -150,6 +149,7 @@ function activeView(card: Card): string {
     <section class="workspace" aria-labelledby="page-title">
       ${isOffline ? '<div class="offline-banner" role="status"><p><strong>Offline and ready.</strong> Your card is saved on this device.</p></div>' : ''}
       ${due ? `<div class="reminder-banner" role="status"><p><strong>Gentle reminder:</strong> this step is here when you are ready.</p><button class="button small" id="dismiss-reminder" type="button">Dismiss reminder</button></div>` : ''}
+      ${demoBanner()}
       <p class="eyebrow">Your active card</p>
       <h1 id="page-title">Welcome back to this step.</h1>
       <p class="lede">You already made the decision. Begin with the action on the card.</p>
@@ -169,7 +169,7 @@ function activeView(card: Card): string {
           <button class="button primary" id="park-card" type="button">Park with a new next step</button>
           <button class="button" id="print-card" type="button">Print card</button>
         </div>
-        <p class="reminder-note"><span aria-hidden="true">●</span> Park when you are stopping but the task continues. Finished clears this card and keeps a ledger entry.</p>
+        <p class="reminder-note"><span aria-hidden="true">●</span> Park when you are stopping but the task continues. Finished clears this card and keeps it in history.</p>
       </article>
     </section>
     ${historyView()}`;
@@ -179,9 +179,14 @@ function historyView(): string {
   const items = state.history.slice().reverse().slice(0, 40);
   return `
     <section class="ledger" aria-labelledby="ledger-title">
-      <div class="ledger-head"><div><p class="eyebrow">Local ledger</p><h2 id="ledger-title">Re-entry history</h2></div><p>${state.history.length} ${state.history.length === 1 ? 'decision' : 'decisions'}</p></div>
-      ${items.length === 0 ? '<p class="empty-ledger">Your decisions will appear here after you set the first card.</p>' : `<ol class="history-list">${items.map(historyItem).join('')}</ol>`}
+      <div class="ledger-head"><div><p class="eyebrow">Your card record</p><h2 id="ledger-title">History</h2></div><p>${state.history.length} ${state.history.length === 1 ? 'entry' : 'entries'}</p></div>
+      ${items.length === 0 ? '<p class="empty-ledger">Your card history appears here after you create a card.</p>' : `<ol class="history-list">${items.map(historyItem).join('')}</ol>`}
     </section>`;
+}
+
+function demoBanner(): string {
+  if (!demoMode) return '';
+  return `<aside class="demo-banner" aria-label="Demo controls"><p><strong>Demo — sample data, nothing is saved.</strong></p><div class="button-row"><button class="button small" id="reset-demo" type="button">Reset demo</button><button class="button small" id="start-real" type="button">Start for real</button></div></aside>`;
 }
 
 function historyItem(entry: HistoryEntry): string {
@@ -197,35 +202,17 @@ function dialogs(): string {
   return `
     <dialog id="park-dialog" aria-labelledby="park-title"><div class="dialog-inner">
       <div class="dialog-head"><div><p class="eyebrow">Leave a clean edge</p><h2 id="park-title">What comes next?</h2></div><button class="icon-button close-dialog" type="button" aria-label="Close">×</button></div>
-      <p>Update the card before you step away. This choice is recorded in your local ledger.</p>
+      <p>Update the card before you step away. This change appears in your history.</p>
       <form id="park-form" novalidate>${state.active ? formFields(state.active) : ''}<p class="form-error" id="park-error" role="alert"></p><div class="button-row"><button class="button primary" type="submit">Park this task</button><button class="button close-dialog" type="button">Keep current card</button></div></form>
     </div></dialog>
     <dialog id="data-dialog" aria-labelledby="data-title"><div class="dialog-inner">
-      <div class="dialog-head"><div><p class="eyebrow">Your device, your data</p><h2 id="data-title">Data &amp; settings</h2></div><button class="icon-button close-dialog" type="button" aria-label="Close">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">Your device, your data</p><h2 id="data-title">Manage data and settings</h2></div><button class="icon-button close-dialog" type="button" aria-label="Close">×</button></div>
       <section class="settings-section"><h3>Quiet hours</h3><p>Reminder times inside this window move to the end of quiet hours.</p><form id="quiet-form"><div class="field-row"><div class="field"><label for="quiet-start">Start</label><select id="quiet-start" name="quietStart">${hourOptions(state.settings.quietStart)}</select></div><div class="field"><label for="quiet-end">End</label><select id="quiet-end" name="quietEnd">${hourOptions(state.settings.quietEnd)}</select></div></div><button class="button small" type="submit">Save quiet hours</button></form></section>
       <section class="settings-section"><h3>Local reminder permission</h3><p id="notification-status">${notificationStatus()}</p><button class="button small" id="notification-button" type="button" ${!('Notification' in window) ? 'disabled' : ''}>Allow system notifications</button></section>
-      <section class="settings-section"><h3>Own your data</h3><p>JSON restores the full app. CSV opens your decision history in a spreadsheet.</p><div class="button-row"><button class="button small" id="export-json" type="button">Export JSON</button><button class="button small" id="export-csv" type="button">Export CSV</button><label class="button small file-button">Import JSON<input id="import-json" type="file" accept="application/json,.json" /></label></div></section>
-      <section class="settings-section"><h3>Install &amp; support</h3><div class="button-row"><button class="button small" id="install-button" type="button" ${installPrompt ? '' : 'hidden'}>Install app</button><button class="button small" id="open-support" type="button">Open supporter edition</button></div></section>
-      <section class="settings-section"><h3>Clear the ledger</h3><p>This removes history but keeps the active card.</p><button class="button small danger" id="clear-history" type="button">Clear re-entry history</button></section>
-    </div></dialog>
-    <dialog id="support-dialog" aria-labelledby="support-title"><div class="dialog-inner">
-      <div class="dialog-head"><div><p class="eyebrow">Optional, once</p><h2 id="support-title">Supporter print edition</h2></div><button class="icon-button close-dialog" type="button" aria-label="Close">×</button></div>
-      <p class="price-stamp">US $6 · one-time purchase</p>
-      <p>Every practical feature stays free. A supporter license adds two cosmetic ink-and-paper editions and helps keep this quiet utility available.</p>
-      ${supporterUnlocked ? supporterControls() : `<div class="locked-note"><p><strong>Included:</strong> Moss Field and Night Ledger print editions. No subscription.</p><a class="button primary" href="${checkoutUrl()}">Buy supporter edition</a></div>`}
-      <section class="settings-section"><h3>Restore a purchase</h3><p>Paste the license token from your receipt. Verification uses Sociobot, the merchant of record; payment details never reach this app.</p><form id="license-form"><div class="license-row"><label class="visually-hidden" for="license-token">License token</label><input id="license-token" name="license" required autocomplete="off" placeholder="Paste license token" /><button class="button" type="submit">Verify license</button></div><p class="form-error" id="license-error" role="status"></p></form></section>
-      <p class="hint">Purchases and refunds are handled by Sociobot/Dodo. A refunded or revoked license stops unlocking supporter editions. See <a href="/privacy/">privacy</a> and <a href="/terms/">terms</a>.</p>
+      <section class="settings-section"><h3>Own your data</h3><p>JSON restores the full app. CSV opens your card history in a spreadsheet.</p><div class="button-row"><button class="button small" id="export-json" type="button">Export JSON</button><button class="button small" id="export-csv" type="button">Export CSV</button><label class="button small file-button">Import JSON<input id="import-json" type="file" accept="application/json,.json" /></label></div></section>
+      <section class="settings-section"><h3>Install the app</h3><button class="button small" id="install-button" type="button" ${installPrompt ? '' : 'hidden'}>Install app</button></section>
+      <section class="settings-section"><h3>Clear history</h3><p>This removes history but keeps the active card.</p><button class="button small danger" id="clear-history" type="button">Clear history</button></section>
     </div></dialog>`;
-}
-
-function supporterControls(): string {
-  return `<section class="settings-section"><h3>Your print editions are unlocked</h3><div class="edition-grid" aria-label="Choose print edition">
-    ${editionButton('vermillion', 'Vermillion')}${editionButton('moss', 'Moss field')}${editionButton('night', 'Night ledger')}
-  </div></section>`;
-}
-
-function editionButton(value: PrintEdition, label: string): string {
-  return `<button class="edition-choice" type="button" data-edition="${value}" aria-pressed="${state.settings.printEdition === value}">${label}</button>`;
 }
 
 function hourOptions(selected: number): string {
@@ -233,14 +220,14 @@ function hourOptions(selected: number): string {
 }
 
 function notificationStatus(): string {
-  if (!('Notification' in window)) return 'This browser does not offer local system notifications. In-app reminders still work.';
-  if (Notification.permission === 'granted') return 'System notifications are allowed while the app is running.';
-  if (Notification.permission === 'denied') return 'Notifications are blocked in browser settings. In-app reminders still work.';
-  return 'Optional. The app asks only when you choose this button.';
+  if (!('Notification' in window)) return 'This browser does not offer notification permission.';
+  if (Notification.permission === 'granted') return 'Notification permission is allowed in this browser.';
+  if (Notification.permission === 'denied') return 'Notification permission is blocked in browser settings.';
+  return 'Choose this button to ask this browser for notification permission.';
 }
 
 function render(): void {
-  document.documentElement.dataset.edition = supporterUnlocked ? state.settings.printEdition : 'vermillion';
+  document.documentElement.dataset.edition = 'vermillion';
   main.innerHTML = state.active ? activeView(state.active) : emptyView();
   document.querySelectorAll('dialog').forEach((node) => node.remove());
   document.body.insertAdjacentHTML('beforeend', dialogs());
@@ -260,6 +247,14 @@ function validCardForm(form: HTMLFormElement, error: HTMLElement): boolean {
 }
 
 function bindPageEvents(): void {
+  document.querySelector('#reset-demo')?.addEventListener('click', async () => {
+    state = demoState();
+    if (await persist('Sample card reset.')) render();
+  });
+  document.querySelector('#start-real')?.addEventListener('click', async () => {
+    try { await clearState('demo'); } catch { /* Leaving demo must still work if its storage was already cleared. */ }
+    location.assign('/');
+  });
   const newForm = document.querySelector<HTMLFormElement>('#new-card-form');
   newForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -275,7 +270,7 @@ function bindPageEvents(): void {
     if (!state.active) return;
     state.history.push(entryFromCard(state.active, 'completed'));
     state.active = null;
-    if (await persist('Step finished. Your card is in the ledger.')) render();
+    if (await persist('Step finished. Your card is in history.')) render();
   });
   document.querySelector('#park-card')?.addEventListener('click', () => openDialog('park-dialog'));
   document.querySelector('#print-card')?.addEventListener('click', () => window.print());
@@ -319,7 +314,7 @@ function bindDialogEvents(): void {
   document.querySelector('#notification-button')?.addEventListener('click', async () => {
     if (!('Notification' in window)) return;
     const permission = await Notification.requestPermission();
-    showToast(permission === 'granted' ? 'System notifications allowed.' : 'No problem. In-app reminders still work.');
+    showToast(permission === 'granted' ? 'Notification permission allowed.' : 'Notification permission was not allowed.');
     render();
     openDialog('data-dialog');
   });
@@ -327,10 +322,10 @@ function bindDialogEvents(): void {
   document.querySelector('#export-csv')?.addEventListener('click', () => download(stateToCsv(state), 'next-step-history.csv', 'text/csv'));
   document.querySelector<HTMLInputElement>('#import-json')?.addEventListener('change', importJson);
   document.querySelector('#clear-history')?.addEventListener('click', async () => {
-    if (!state.history.length) { showToast('The ledger is already empty.'); return; }
-    if (!confirm(`Clear ${state.history.length} ledger ${state.history.length === 1 ? 'entry' : 'entries'}? Your active card will stay.`)) return;
+    if (!state.history.length) { showToast('History is already empty.'); return; }
+    if (!confirm(`Clear ${state.history.length} history ${state.history.length === 1 ? 'entry' : 'entries'}? Your active card will stay.`)) return;
     state.history = [];
-    if (await persist('Re-entry history cleared.')) render();
+    if (await persist('History cleared.')) render();
   });
   document.querySelector('#install-button')?.addEventListener('click', async () => {
     if (!installPrompt) return;
@@ -339,32 +334,6 @@ function bindDialogEvents(): void {
     installPrompt = null;
     render();
   });
-  document.querySelector('#open-support')?.addEventListener('click', () => { document.querySelector<HTMLDialogElement>('#data-dialog')?.close(); openDialog('support-dialog'); });
-
-  document.querySelector<HTMLFormElement>('#license-form')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget as HTMLFormElement;
-    const error = document.querySelector<HTMLElement>('#license-error')!;
-    const token = String(new FormData(form).get('license') ?? '').trim();
-    if (!token) { error.textContent = 'Paste the license token from your receipt.'; return; }
-    try { storeLicense(token); } catch (storageError) {
-      error.textContent = storageError instanceof Error ? storageError.message : 'This license could not be saved.';
-      return;
-    }
-    error.textContent = 'Checking your license…';
-    const result = await verifyLicense(true);
-    if (!result) { supporterUnlocked = true; error.textContent = 'Saved for offline use. Verification will retry when you are online.'; render(); openDialog('support-dialog'); return; }
-    if (!result.valid) { supporterUnlocked = false; error.textContent = 'This license is not active. Check the token or use the purchase link.'; return; }
-    supporterUnlocked = true;
-    showToast('Supporter print editions unlocked. Thank you.');
-    render();
-    openDialog('support-dialog');
-  });
-  document.querySelectorAll<HTMLButtonElement>('.edition-choice').forEach((button) => button.addEventListener('click', async () => {
-    if (!supporterUnlocked) return;
-    state.settings.printEdition = button.dataset.edition as PrintEdition;
-    if (await persist('Print edition changed.')) { render(); openDialog('support-dialog'); }
-  }));
 }
 
 function openDialog(id: string): void {
@@ -390,7 +359,7 @@ async function importJson(event: Event): Promise<void> {
   if (!file) return;
   try {
     const imported = validateImportedState(JSON.parse(await file.text()));
-    const summary = `${imported.active ? '1 active card' : 'no active card'} and ${imported.history.length} ledger ${imported.history.length === 1 ? 'entry' : 'entries'}`;
+    const summary = `${imported.active ? '1 active card' : 'no active card'} and ${imported.history.length} history ${imported.history.length === 1 ? 'entry' : 'entries'}`;
     if (!confirm(`Import ${summary}? This replaces the data currently on this device.`)) return;
     state = imported;
     if (await persist('Your data was imported.')) render();
@@ -448,31 +417,26 @@ async function probeConnectivity(): Promise<void> {
 }
 
 async function init(): Promise<void> {
-  const returned = captureReturnedLicense();
-  supporterUnlocked = hasOptimisticUnlock();
+  if (demoMode) {
+    document.title = 'Demo — Next Step Cards';
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', 'Try a realistic sample card and history. Nothing is saved to your cards.');
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://next-step-cards.sociobot.in/demo/');
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', 'Demo — Next Step Cards');
+    document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', 'Demo — Next Step Cards');
+  }
   try {
-    state = validateImportedState(await loadState());
+    const loaded = validateImportedState(await loadState(storageMode));
+    state = demoMode && !loaded.active && loaded.history.length === 0 ? demoState() : loaded;
+    if (demoMode && !loaded.active && loaded.history.length === 0) await saveState(state, 'demo');
     render();
-    if (returned) showToast('License received. Verifying your supporter edition…');
-    const verified = await verifyLicense();
-    if (verified && verified.valid !== supporterUnlocked) {
-      supporterUnlocked = verified.valid;
-      if (!verified.valid) {
-        state.settings.printEdition = 'vermillion';
-        await persist();
-        showToast('The saved license is no longer active. Practical features remain available.', 7000);
-      }
-      render();
-    }
   } catch (error) {
-    main.innerHTML = `<section class="error-panel"><p class="eyebrow">Storage needs attention</p><h1>We couldn’t open your local card.</h1><p>${escapeHtml(error instanceof Error ? error.message : 'Local storage is unavailable.')}</p><p>Check private-browsing or storage settings, then reload. Nothing has been sent anywhere.</p><button class="button" type="button" onclick="location.reload()">Try again</button></section>`;
+    main.innerHTML = `<section class="error-panel"><p class="eyebrow">Storage needs attention</p><h1>We couldn’t open your local card.</h1><p>${escapeHtml(error instanceof Error ? error.message : 'Local storage is unavailable.')}</p><p>Check private-browsing or storage settings, then reload.</p><button class="button" type="button" onclick="location.reload()">Try again</button></section>`;
   }
   await registerServiceWorker();
   await probeConnectivity();
 }
 
 document.querySelector('#data-button')?.addEventListener('click', () => openDialog('data-dialog'));
-document.querySelector('#support-button')?.addEventListener('click', () => openDialog('support-dialog'));
 window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); installPrompt = event as BeforeInstallPromptEvent; });
 window.addEventListener('online', () => { isOffline = false; showToast('Back online. Your local card was available throughout.'); render(); void probeConnectivity(); });
 window.addEventListener('offline', () => { isOffline = true; showToast('You are offline. Your card remains available.'); render(); });

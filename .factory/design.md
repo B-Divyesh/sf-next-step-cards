@@ -67,6 +67,10 @@ One editorial hero illustration appears only in the empty state / welcome region
 
 **Provenance:** generated specifically for Next Step Cards using the factory Azure image deployment (`factory-image`) on 2026-08-27. The exact prompt is stored beside the source image in `assets/src/hero-card.json`. Generated imagery is disclosed in the footer. The selected source and optimized WebP are original project assets.
 
+The 1200×630 social preview (`public/assets/social-card.webp`) is a center crop
+of that same original hero asset, made locally on 2026-08-28; it introduces no
+new generated subject or third-party material.
+
 ## Why this fits
 
 The interface acts like an external memory cue without pretending to think for the user. A single physical-looking card makes the current next action unmistakable; the ledger shows continuity after interruptions. Print texture gives emotional warmth, while strict hierarchy keeps the experience quiet enough for executive-function fatigue.
