@@ -129,7 +129,7 @@ function emptyView(): string {
         <p class="action-outcome">See a filled card and history first.</p>
         <ul class="plain-facts" aria-label="Product facts"><li>Saved in this browser</li><li>Reload while offline after your first visit</li><li>Core tools are free</li></ul>
         <figure class="hero-print">
-          <img src="/assets/hero-card-640.webp?v=1.0.4" srcset="/assets/hero-card-640.webp?v=1.0.4 640w, /assets/hero-card.webp?v=1.0.4 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
+          <img src="/assets/hero-card-640.webp?v=1.0.5" srcset="/assets/hero-card-640.webp?v=1.0.5 640w, /assets/hero-card.webp?v=1.0.5 1200w" sizes="(max-width: 800px) calc(100vw - 42px), 550px" width="1200" height="800" alt="A printed index card with a red check mark moving from scattered paper into open space" decoding="async" fetchpriority="high" />
         </figure>
       </div>
       <form class="paper-form" id="new-card-form" novalidate>
@@ -186,7 +186,7 @@ function historyView(): string {
 
 function demoBanner(): string {
   if (!demoMode) return '';
-  return `<aside class="demo-banner" aria-label="Demo controls"><p><strong>Demo — sample data, nothing is saved.</strong></p><div class="button-row"><button class="button small" id="reset-demo" type="button">Reset demo</button><button class="button small" id="start-real" type="button">Start for real</button></div></aside>`;
+  return `<div class="demo-banner"><p><strong>Demo — sample data, nothing is saved.</strong></p><div class="button-row"><button class="button small" id="reset-demo" type="button">Reset demo</button><button class="button small" id="start-real" type="button">Start for real</button></div></div>`;
 }
 
 function historyItem(entry: HistoryEntry): string {

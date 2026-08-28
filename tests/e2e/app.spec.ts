@@ -162,10 +162,14 @@ test('@claim:clear-history-preserves-active clears only demo history', async ({ 
   await expect(page.getByText('0 entries')).toBeVisible();
 });
 
-test('has no serious accessibility violations and supports route focus', async ({ page }) => {
+test('has no accessibility violations on every shipped route and supports route focus', async ({ page }) => {
+  for (const route of ['/', '/demo/', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(route);
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations, `Axe violations on ${route}`).toEqual([]);
+  }
+
   await page.goto('/demo/');
-  const results = await new AxeBuilder({ page }).analyze();
-  expect(results.violations.filter((item) => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
   await page.getByRole('link', { name: 'Privacy' }).first().click();
   await expect(page).toHaveURL('/privacy/');
   await expect(page.locator('h1')).toBeFocused();
