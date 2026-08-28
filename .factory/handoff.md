@@ -1,49 +1,95 @@
-# Next Step Cards — review 5 handoff
+# Next Step Cards — polish round 5 handoff
 
-Review date: 2026-08-28
+Work order: `next-step-cards-polish-5`
 
-Reviewed commit: c5f19cead1a9d9912f9d95c3c4674b1238a75814
-Live site: https://next-step-cards.sociobot.in
+Implementation commit: `10aa056f9cbf50898e846312a67d8fb3439c515a`
 
-## Done
+Deployment: `e4903d25-197b-4dfc-bc5d-066b0d6c0b05`
 
-- Completed the adversarial cold read at 390 × 844 and 1440 × 900.
-- Audited visible landing and README copy with word counts.
-- Exercised the live one-click demo, reset, real-data isolation, same-origin
-  network behavior, and offline reload.
-- Ran all twelve exact claim commands independently from a temporary clean
-  clone.
-- Rechecked every earlier review and verification finding in the live site and
-  current code/configuration.
-- Crawled live links; checked route metadata, designed 404, deep links,
-  forward/Back focus, shared shell, mobile overflow, and security/cache
-  headers.
-- Ran live Axe scans and the factory URL verifier on all shipped route
-  documents.
-- Wrote .factory/review-5.md. No product code was changed.
+Live site: <https://next-step-cards.sociobot.in>
 
-## Verdict and remaining work
+## What changed
 
-**FAIL** with one minor finding, F-5-1. The documented query-demo route changes
-to demo content but retains the home og:description and twitter:description;
-its raw response is also home metadata. Redirect that entry to /demo/ or serve
-complete demo metadata in its initial response, and add a raw-response/browser
-regression for all demo description tags.
+- Fixed F-5-1. The compatibility entry `/?demo=1` now replaces itself with
+  `/demo/` from a synchronous head bootstrap before home metadata is parsed.
+- Kept `/demo/` as the sole documented and canonical demo route. Its raw HTML
+  now uses the same standard, Open Graph, and Twitter description.
+- Added browser coverage for both demo entry points and source-response
+  coverage for redirect ordering and direct-demo raw metadata.
+- Added OG and Twitter description updates to the app fallback route logic.
+- Advanced the manifest, asset queries, footer marker, and service-worker
+  cache to build `1.0.7`.
+- Expanded the mobile boundary regression to all maximum-length user fields.
+- Updated `.factory/claims.json`, demo documentation, the full copy audit, and
+  the 53-character verb-first catalog description.
+- Rechecked every earlier B1–B5, M1–M4, Verify-1, F-2, F-3, and F-4 repair.
+  `.factory/polish-5.md` maps each finding to its change and evidence.
 
-## Verification
+## Exact verification
 
-    npm ci
-    npm test
-    npm run build
-    npm run test:e2e
+From a temporary clean clone of the committed repair:
 
-- npm test: 7/7 passed.
-- npm run build: passed and produced dist/.
-- npm run test:e2e: 32/32 passed across desktop and mobile.
-- Each command in .factory/claims.json: passed independently, 2/2 browser
-  projects per claim.
-- Live verify-url.sh: passed on home, demo, Privacy, Terms, and 404.
-- Live Axe: zero violations on those five routes.
+```sh
+npm ci
+npm test
+npm run build
+npm run test:e2e
+npm audit --omit=dev --audit-level=high
+```
 
-See .factory/review-5.md for the finding, exact copy audit, claim matrix,
-earlier-finding audit, and concrete acceptance fix.
+- `npm ci`: passed; 0 vulnerabilities.
+- `npm test`: 8/8 unit and deployment-configuration tests passed.
+- `npm run build`: passed and produced `dist/index.html`.
+- `npm run test:e2e`: 34/34 desktop/mobile checks passed.
+- Production dependency audit: 0 vulnerabilities.
+- All twelve exact commands in `.factory/claims.json` passed independently in
+  desktop and mobile. The clean-clone log ends `CLAIM_SUITE_PASSED`.
+- The production bundle is 8.31 kB gzip JavaScript and 3.95 kB gzip CSS. The
+  mobile hero is 33,242 bytes. No web font is shipped.
+
+## Browser, accessibility, privacy, and offline evidence
+
+- The factory URL verifier passed locally and live for `/`, `/demo/`,
+  `/?demo=1`, `/privacy/`, `/terms/`, and `/404.html`. Every route had the
+  correct title, `lang=en`, one h1, a main landmark, image alt text, labelled
+  buttons, and zero console errors.
+- Playwright Axe found zero violations on home, demo, Privacy, Terms, and 404
+  in desktop and mobile projects. Keyboard route focus and Back restoration
+  passed.
+- A fresh live real card survived query-demo park, reset, and Start for real.
+  A clean query-demo context contained only `demo:next-step-cards` and made
+  only same-origin requests.
+- After one connected demo visit, a fresh offline navigation retained the
+  sample and displayed **Offline and ready.**
+- Maximum 100/280/500/240/240-character unbroken field values produced no
+  horizontal overflow at 390 px.
+- Mobile Lighthouse: Performance 98, Accessibility 100, Best Practices 100,
+  SEO 100; FCP 0.7 s, LCP 2.0 s, TBT 120 ms, CLS 0.
+
+## Live release evidence
+
+- Deployment id: `e4903d25-197b-4dfc-bc5d-066b0d6c0b05`.
+- Cold `/?demo=1` ended at `/demo/` with the demo title, canonical, standard
+  description, Open Graph description, and Twitter description.
+- Live `/no-such-route-polish-5` returned HTTP 404 with the designed page.
+- Manifest MIME, CSP, Permissions-Policy, Referrer-Policy, and `nosniff`
+  headers passed. The hero is immutable for one year; the worker is no-cache.
+- SHA-256 matched the local release for root, demo, both legal pages, 404,
+  service worker, and manifest.
+- Live screenshots and machine-readable reports are under
+  `.factory/evidence/polish-5-live/` in the worker workspace.
+
+## Run and deploy
+
+```sh
+npm ci
+npm test
+npm run build
+npm run test:e2e
+/opt/fleet/lib/deploy-static.sh next-step-cards dist
+```
+
+## Known gaps and next steps
+
+None. No finding from review rounds 1–5 or the independent verification
+reports remains unresolved.

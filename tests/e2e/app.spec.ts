@@ -209,6 +209,9 @@ test('keeps the first screen and maximum values within a 390px viewport', async 
   await page.getByRole('link', { name: 'Create my card' }).click();
   await page.getByLabel('Task name').fill('T'.repeat(100));
   await page.getByLabel('Next two-minute action').fill('A'.repeat(280));
+  await page.getByLabel('Link, file, or place (optional)').fill('R'.repeat(500));
+  await page.getByLabel('Why this matters (optional)').fill('W'.repeat(240));
+  await page.getByLabel('I can stop when… (optional)').fill('S'.repeat(240));
   await page.getByRole('button', { name: 'Create my next-step card' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
 });

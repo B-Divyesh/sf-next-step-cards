@@ -2,8 +2,8 @@
 
 Open <https://next-step-cards.sociobot.in/demo/>. It loads an active
 community-grant-outline card and two realistic workshop-brief history entries.
-The older `?demo=1` entry immediately redirects there before app content or
-home-page metadata loads.
+The older `?demo=1` entry immediately redirects there before app content
+renders or later home-page metadata is parsed.
 
 Demo state uses the IndexedDB database `demo:next-step-cards`. Real cards use
 `next-step-cards`; demo mode never reads or writes that database. **Reset demo**
