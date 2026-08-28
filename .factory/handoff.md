@@ -1,4 +1,44 @@
-# Next Step Cards — verification handoff
+# Next Step Cards — adversarial first-read review handoff
+
+## Review result — FAIL
+
+Work order: `next-step-cards-review-1`
+Reviewed commit: `a8069a27b488e9f000d80968749343c5fb668664`
+
+No product code was changed. The review report is in
+`.factory/review-1.md` and is committed with this handoff.
+
+### What was verified
+
+- Fresh live Chromium reads at 390 x 844 and 1440 x 900.
+- Direct `/demo` and `?demo=1` checks, including storage isolation and an
+  offline reload observation with request-origin capture.
+- Live metadata, internal/external link, route-focus, 404, and checkout URL
+  checks.
+- Clean dependency install, `npm test` (7/7), `npm run build`, and
+  `npm run test:e2e` (12/12).
+
+### Blocking gaps
+
+1. No one-click sample-data demo.
+2. `?demo=1` reads ordinary local storage rather than an isolated demo store.
+3. `.factory/claims.json` and all tagged claim tests are absent.
+4. The configured supporter checkout URL returns HTTP 404.
+5. Unknown routes render the normal app instead of a designed 404 page.
+
+See the review for exact quotes, copy audit, reproducible observations, and
+required fixes/tests. Product code remains buildable; rerun the checks with:
+
+```sh
+npm ci
+npm test
+npm run build
+npm run test:e2e
+```
+
+---
+
+# Prior verification handoff
 
 ## Independent verification 2 — PASS
 
